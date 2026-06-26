@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>3D Game Engine</title>
+
+<style>
+body {
+    margin: 0;
+    overflow: hidden;
+    font-family: Arial;
+}
+
+canvas { display:block; }
+
+/* LEFT MENU */
+#leftMenu {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 280px;
+    height: 100vh;
+    background: #1e1e1e;
+    color: white;
+    transform: translateX(-260px);
+    transition: 0.3s;
+    padding: 10px;
+}
+
+#leftMenu.open {
+    transform: translateX(0);
+}
+
+#hamburger {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    background: #333;
+    color: white;
+    padding: 10px;
+    cursor: pointer;
+    z-index: 10;
+}
+
+input, button {
+    width: 100%;
+    margin-top: 5px;
+}
+
+/* RIGHT CLICK MENU */
+#contextMenu {
+    position: absolute;
+    display: none;
+    background: #333;
+    color: white;
+    padding: 5px;
+    z-index: 1000;
+}
+
+#contextMenu button {
+    width: 100%;
+    margin: 2px 0;
+}
+
+/* RIGHT PANEL */
+#rightPanel {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 200px;
+    height: 100vh;
+    background: #222;
+    color: white;
+    padding: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="hamburger">☰</div>
+
+<div id="leftMenu">
+    <h3>Scene</h3>
+    <div id="objectList"></div>
+
+    <h3>Inspector</h3>
+    <input id="objName" placeholder="Name">
+    <input id="posX" placeholder="Pos X">
+    <input id="posY" placeholder="Pos Y">
+    <input id="posZ" placeholder="Pos Z">
+    <input id="scale" placeholder="Scale">
+
+    <button onclick="applyChanges()">Apply</button>
+
+    <h3>Script</h3>
+    <textarea id="scriptBox" rows="5" style="width:100%"></textarea>
+    <button onclick="applyScript()">Add Script</button>
+</div>
+
+<div id="rightPanel">
+    <h3>Upload</h3>
+    <input type="file" id="fileInput" accept=".glb,.gltf">
+    <button onclick="clearUploads()">Uploads löschen</button>
+</div>
+
+<div id="contextMenu">
+    <button onclick="renameObj()">Umbenennen</button>
+    <button onclick="deleteObj()">Löschen</button>
+</div>
+
+<script type="module">
+import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.161/build/three.module.js";
+import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.161/examples/jsm/controls/OrbitControls.js";
+import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.161/examples/jsm/loaders/GLTFLoader.js";
+import * as CANNON from "https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js";
+
+/* ================= WORLD ================= */
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xffffff);
+
+const camera = new THREE.PerspectiveCamera(75, innerWidth/innerHeight, 0.1, 1000);
+camera.position.set(3,3,6);
+
+const renderer = new THREE.WebGLRenderer({ antialias:true });
+renderer.setSize(innerWidth, innerHeight);
+document.body.appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+
+/* LIGHT */
+const light = new THREE.DirectionalLight(0xffffff,1);
+light.position.set(5,5,5);
+scene.add(light);
+
+/* GROUND */
+const groundMesh = new THREE.Mesh(
+    new THREE.PlaneGeometry(20,20),
+    new THREE.MeshStandardMaterial({ color:0xeeeeee })
+);
+groundMesh.rotation.x = -Math.PI/2;
+scene.add(groundMesh);
+
+/* ================= PHYSICS ================= */
+const world = new CANNON.World();
+world.gravity.set(0,-9.82,0);
+
+const groundBody = new CANNON.Body({
+    mass:0,
+    shape:new CANNON.Plane()
+});
+groundBody.quaternion.setFromEuler(-Math.PI/2,0,0);
+world.addBody(groundBody);
+
+/* ================= OBJECTS ================= */
+const loader = new GLTFLoader();
+
+let objects = [];
+let selected = null;
+let selectedBody = null;
+
+/* ================= LOAD MODEL ================= */
+document.getElementById("fileInput").addEventListener("change", e=>{
+    const file = e.target.files[0];
+    const url = URL.createObjectURL(file);
+
+    loader.load(url, gltf=>{
+        const obj = gltf.scene;
+        obj.position.set(0,2,0);
+        scene.add(obj);
+
+        const body = new CANNON.Body({
+            mass:1,
+            shape:new CANNON.Box(new CANNON.Vec3(0.5,0.5,0.5))
+        });
+        body.position.set(0,2,0);
+        world.addBody(body);
+
+        objects.push({ obj, body, name:file.name });
+
+        updateList();
+    });
+});
+
+/* ================= LEFT MENU ================= */
+document.getElementById("hamburger").onclick=()=>{
+    document.getElementById("leftMenu").classList.toggle("open");
+};
+
+function updateList(){
+    const list = document.getElementById("objectList");
+    list.innerHTML="";
+    objects.forEach((o,i)=>{
+        const div=document.createElement("div");
+        div.innerHTML=o.name;
+        div.onclick=()=>select(i);
+        list.appendChild(div);
+    });
+}
+
+function select(i){
+    selected = objects[i];
+    document.getElementById("objName").value = selected.name;
+}
+
+/* ================= APPLY CHANGES ================= */
+window.applyChanges=()=>{
+    if(!selected) return;
+
+    selected.name = document.getElementById("objName").value;
+
+    selected.obj.scale.set(
+        parseFloat(scale.value||1),
+        parseFloat(scale.value||1),
+        parseFloat(scale.value||1)
+    );
+
+    selected.obj.position.set(
+        parseFloat(posX.value||0),
+        parseFloat(posY.value||0),
+        parseFloat(posZ.value||0)
+    );
+};
+
+/* ================= SCRIPT SYSTEM ================= */
+window.applyScript=()=>{
+    if(!selected) return;
+
+    const code = document.getElementById("scriptBox").value;
+
+    selected.script = new Function("obj", "time", code);
+};
+
+/* ================= RIGHT CLICK ================= */
+const menu = document.getElementById("contextMenu");
+
+window.addEventListener("contextmenu", e=>{
+    e.preventDefault();
+
+    const mouse = new THREE.Vector2(
+        (e.clientX/innerWidth)*2-1,
+        -(e.clientY/innerHeight)*2+1
+    );
+
+    const raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(mouse,camera);
+
+    const hits = raycaster.intersectObjects(scene.children,true);
+
+    if(hits.length>0){
+        selected = objects.find(o=>o.obj===hits[0].object.parent);
+
+        menu.style.display="block";
+        menu.style.left=e.clientX+"px";
+        menu.style.top=e.clientY+"px";
+    }
+});
+
+window.renameObj=()=>{
+    const n = prompt("Neuer Name:");
+    if(selected) selected.name=n;
+    menu.style.display="none";
+    updateList();
+};
+
+window.deleteObj=()=>{
+    if(!selected) return;
+
+    scene.remove(selected.obj);
+    world.removeBody(selected.body);
+
+    objects = objects.filter(o=>o!==selected);
+    selected=null;
+
+    menu.style.display="none";
+    updateList();
+};
+
+/* ================= PHYSICS LOOP ================= */
+function animate(){
+    requestAnimationFrame(animate);
+
+    world.step(1/60);
+
+    objects.forEach(o=>{
+        o.obj.position.copy(o.body.position);
+        o.obj.quaternion.copy(o.body.quaternion);
+
+        if(o.script){
+            o.script(o.obj, performance.now());
+        }
+    });
+
+    controls.update();
+    renderer.render(scene,camera);
+}
+
+animate();
+
+window.addEventListener("resize",()=>{
+    camera.aspect=innerWidth/innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth,innerHeight);
+});
+</script>
+
+</body>
+</html>
