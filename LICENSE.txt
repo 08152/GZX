@@ -1,0 +1,69 @@
+BATTLE X - COMMERCIAL SOFTWARE LICENSE
+
+Copyright (c) 2026 [DEIN NAME / FIRMA]
+
+Alle Rechte vorbehalten.
+
+
+1. URHEBERRECHT
+
+BATTLE X sowie der dazugehörige eigene Quellcode, Inhalte und
+Entwicklungsarbeiten sind geistiges Eigentum des Rechteinhabers.
+
+Der Rechteinhaber behält alle Rechte an der Software.
+
+
+2. NUTZUNGSRECHTE
+
+Der Rechteinhaber ist berechtigt, diese Software:
+
+- kommerziell zu veröffentlichen
+- zu vertreiben
+- in Anwendungen und digitalen Produkten zu verwenden
+- für Webseiten, Spiele und mobile Anwendungen bereitzustellen
+
+
+3. DRITTANBIETER-LIZENZEN
+
+Diese Software kann Komponenten von Drittanbietern enthalten.
+
+Beispiel:
+
+ws (WebSocket Library)
+Lizenz: MIT License
+https://github.com/websockets/ws
+
+Die jeweiligen Rechte und Lizenzbedingungen der Drittanbieter bleiben
+unverändert bestehen.
+
+
+4. INHALTE
+
+Alle verwendeten Grafiken, Sounds, Modelle, Texte und andere Medien müssen
+entweder Eigentum des Rechteinhabers sein oder unter einer gültigen Lizenz
+verwendet werden.
+
+Die Verwendung geschützter Inhalte Dritter ohne Erlaubnis ist nicht
+gestattet.
+
+
+5. HAFTUNGSAUSSCHLUSS
+
+Die Software wird ohne Garantie bereitgestellt.
+Der Rechteinhaber übernimmt keine Haftung für Schäden, Datenverluste oder
+Unterbrechungen, die durch die Nutzung der Software entstehen.
+
+
+6. VERÖFFENTLICHUNG
+
+Der Rechteinhaber kann diese Software über digitale Plattformen,
+einschließlich App Stores und Online-Dienste, veröffentlichen.
+
+
+7. GELTENDES RECHT
+
+Diese Lizenz unterliegt den geltenden gesetzlichen Regelungen des Landes,
+in dem der Rechteinhaber seinen Sitz hat.
+
+
+Ende der Lizenz.
