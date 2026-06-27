@@ -3,23 +3,20 @@
 
 <head>
 
-<meta charset="UTF-8">
-<title>Battle X Online</title>
+<title>Battle X</title>
 
 <style>
 
 body{
 
 margin:0;
-
 height:100vh;
-
 background:white;
 
 }
 
-
 </style>
+
 
 </head>
 
@@ -31,14 +28,25 @@ background:white;
 
 
 const socket = new WebSocket(
-"ws://localhost:3000"
+"wss://gzx.onrender.com"
 );
 
 
 
 socket.onopen = ()=>{
 
-console.log("Mit Server verbunden");
+console.log(
+"Server verbunden"
+);
+
+
+socket.send(JSON.stringify({
+
+type:"join",
+
+name:"Spieler"
+
+}));
 
 };
 
@@ -46,9 +54,21 @@ console.log("Mit Server verbunden");
 
 socket.onmessage = (event)=>{
 
+
 console.log(
 "Server:",
 event.data
+);
+
+
+};
+
+
+
+socket.onclose = ()=>{
+
+console.log(
+"Verbindung beendet"
 );
 
 };
