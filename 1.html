@@ -29,7 +29,7 @@ height:100%;
 background:url("1.png") center/cover no-repeat;
 }
 
-/* dunkler overlay optional */
+/* optional dark overlay */
 .background::after{
 content:"";
 position:absolute;
@@ -37,7 +37,7 @@ inset:0;
 background:rgba(0,0,0,0.25);
 }
 
-/* ================= TOP UI ================= */
+/* ================= START BUTTON ================= */
 
 .topbar{
 position:absolute;
@@ -51,7 +51,7 @@ z-index:5;
 .start-btn{
 background:yellow;
 border:none;
-padding:15px 40px;
+padding:15px 45px;
 font-size:22px;
 font-weight:bold;
 border-radius:12px;
@@ -115,8 +115,7 @@ transition:0.3s;
 transform:scale(1.1);
 }
 
-/* ================= LINKS ================= */
-
+/* links */
 a{
 text-decoration:none;
 }
@@ -146,15 +145,15 @@ text-decoration:none;
 </div>
 
 
-<!-- MENU -->
+<!-- SIDE MENU -->
 <div class="menu" id="menu">
 
 <a href="shop.html">
-<img src="1_icon.png">
+<img src="1_icon.png" onerror="this.style.display='none'">
 </a>
 
 <a href="gun.html">
-<img src="2_icon.png">
+<img src="2_icon.png" onerror="this.style.display='none'">
 </a>
 
 </div>
@@ -163,8 +162,7 @@ text-decoration:none;
 <script>
 
 function toggleMenu(){
-document.getElementById("menu")
-.classList.toggle("open");
+document.getElementById("menu").classList.toggle("open");
 }
 
 </script>
