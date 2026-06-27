@@ -19,16 +19,18 @@ height:100vh;
 display:flex;
 flex-direction:column;
 overflow:hidden;
+background:#000;
 }
 
 
 /* =======================
-   TOP AREA (LOBBY)
+   TOP AREA (BACKGROUND = 1.png)
 ======================= */
 
 .top{
 height:55%;
-background:url("backround.png");
+
+background:url("1.png");
 background-size:cover;
 background-position:center;
 
@@ -39,6 +41,7 @@ align-items:center;
 position:relative;
 }
 
+/* dunkler Overlay */
 .top::after{
 content:"";
 position:absolute;
@@ -47,7 +50,7 @@ background:rgba(0,0,0,0.45);
 }
 
 
-/* CENTER WRAPPER */
+/* CENTER */
 .center{
 z-index:2;
 display:flex;
@@ -58,7 +61,7 @@ gap:20px;
 
 
 /* =======================
-   PLATFORM + CUBE
+   CUBE + PLATFORM
 ======================= */
 
 .scene{
@@ -85,8 +88,8 @@ height:90px;
 position:relative;
 
 transform-style:preserve-3d;
-animation:spin 4s linear infinite;
 
+animation:spin 4s linear infinite;
 margin-bottom:10px;
 }
 
@@ -100,7 +103,7 @@ border:1px solid rgba(255,255,255,0.8);
 box-shadow:inset 0 0 10px rgba(255,255,255,0.3);
 }
 
-/* alle 6 Seiten */
+/* alle Seiten */
 .front  { transform:rotateY(0deg) translateZ(45px); }
 .back   { transform:rotateY(180deg) translateZ(45px); }
 .right  { transform:rotateY(90deg) translateZ(45px); }
@@ -116,11 +119,12 @@ box-shadow:inset 0 0 10px rgba(255,255,255,0.3);
 
 
 /* =======================
-   BOTTOM (GAMES)
+   BOTTOM AREA
 ======================= */
 
 .bottom{
 height:45%;
+
 background:linear-gradient(135deg,#00c6ff,#0072ff);
 
 display:flex;
@@ -129,7 +133,7 @@ align-items:center;
 }
 
 
-/* GAME BOX */
+/* GAMES BOX */
 .games{
 width:80%;
 height:70%;
@@ -148,36 +152,17 @@ font-size:22px;
 
 border:1px solid rgba(255,255,255,0.3);
 
-transition:0.3s;
-
-/* AAA Feel */
 cursor:pointer;
+
+transition:0.3s;
 }
 
-/* =======================
-   HOVER AAA EFFECT
-======================= */
 
+/* AAA HOVER EFFECT */
 .games:hover{
 transform:scale(1.05);
 box-shadow:0 0 40px rgba(0,198,255,0.8);
 border:1px solid cyan;
-}
-
-
-/* optional glow animation */
-.games::before{
-content:"";
-position:absolute;
-width:100%;
-height:100%;
-border-radius:25px;
-opacity:0;
-transition:0.3s;
-}
-
-.games:hover::before{
-opacity:1;
 }
 
 </style>
@@ -191,7 +176,6 @@ opacity:1;
 <div class="top">
 
 <div class="center">
-
 
 <div class="scene">
 
