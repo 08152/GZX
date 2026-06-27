@@ -2,112 +2,232 @@
 <html>
 
 <head>
-
 <meta charset="UTF-8">
-
-<title>Battle X Online</title>
-
+<title>Battle X Lobby</title>
 
 <style>
 
-body{
-
+*{
 margin:0;
-
-height:100vh;
-
-background:white;
-
+padding:0;
+box-sizing:border-box;
 font-family:Arial;
+}
 
+body{
+height:100vh;
 display:flex;
-
-justify-content:center;
-
-align-items:center;
-
+flex-direction:column;
+overflow:hidden;
 }
 
 
-h1{
+/* =======================
+   TOP AREA (LOBBY)
+======================= */
 
-font-size:50px;
+.top{
+height:55%;
+background:url("backround.png");
+background-size:cover;
+background-position:center;
 
+display:flex;
+justify-content:center;
+align-items:center;
+
+position:relative;
+}
+
+.top::after{
+content:"";
+position:absolute;
+inset:0;
+background:rgba(0,0,0,0.45);
+}
+
+
+/* CENTER WRAPPER */
+.center{
+z-index:2;
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:20px;
+}
+
+
+/* =======================
+   PLATFORM + CUBE
+======================= */
+
+.scene{
+display:flex;
+flex-direction:column;
+align-items:center;
+}
+
+.platform{
+width:180px;
+height:18px;
+
+background:linear-gradient(90deg,#111,#00c6ff,#111);
+border-radius:50px;
+
+box-shadow:0 0 25px #00c6ff;
+}
+
+
+.cube{
+width:90px;
+height:90px;
+
+position:relative;
+
+transform-style:preserve-3d;
+animation:spin 4s linear infinite;
+
+margin-bottom:10px;
+}
+
+.face{
+position:absolute;
+width:90px;
+height:90px;
+
+background:linear-gradient(135deg,#00c6ff,#0066ff);
+border:1px solid rgba(255,255,255,0.8);
+box-shadow:inset 0 0 10px rgba(255,255,255,0.3);
+}
+
+/* alle 6 Seiten */
+.front  { transform:rotateY(0deg) translateZ(45px); }
+.back   { transform:rotateY(180deg) translateZ(45px); }
+.right  { transform:rotateY(90deg) translateZ(45px); }
+.left   { transform:rotateY(-90deg) translateZ(45px); }
+.topf   { transform:rotateX(90deg) translateZ(45px); }
+.bottom { transform:rotateX(-90deg) translateZ(45px); }
+
+
+@keyframes spin{
+0%{ transform:rotateX(0) rotateY(0); }
+100%{ transform:rotateX(360deg) rotateY(360deg); }
+}
+
+
+/* =======================
+   BOTTOM (GAMES)
+======================= */
+
+.bottom{
+height:45%;
+background:linear-gradient(135deg,#00c6ff,#0072ff);
+
+display:flex;
+justify-content:center;
+align-items:center;
+}
+
+
+/* GAME BOX */
+.games{
+width:80%;
+height:70%;
+
+background:rgba(0,0,0,0.25);
+backdrop-filter:blur(12px);
+
+border-radius:25px;
+
+display:flex;
+justify-content:center;
+align-items:center;
+
+color:white;
+font-size:22px;
+
+border:1px solid rgba(255,255,255,0.3);
+
+transition:0.3s;
+
+/* AAA Feel */
+cursor:pointer;
+}
+
+/* =======================
+   HOVER AAA EFFECT
+======================= */
+
+.games:hover{
+transform:scale(1.05);
+box-shadow:0 0 40px rgba(0,198,255,0.8);
+border:1px solid cyan;
+}
+
+
+/* optional glow animation */
+.games::before{
+content:"";
+position:absolute;
+width:100%;
+height:100%;
+border-radius:25px;
+opacity:0;
+transition:0.3s;
+}
+
+.games:hover::before{
+opacity:1;
 }
 
 </style>
 
-
 </head>
-
 
 <body>
 
 
-<h1 id="status">
-Verbinde...
-</h1>
+<!-- TOP -->
+<div class="top">
+
+<div class="center">
+
+
+<div class="scene">
+
+<!-- CUBE -->
+<div class="cube">
+
+<div class="face front"></div>
+<div class="face back"></div>
+<div class="face right"></div>
+<div class="face left"></div>
+<div class="face topf"></div>
+<div class="face bottom"></div>
+
+</div>
+
+<!-- PLATFORM -->
+<div class="platform"></div>
+
+</div>
+
+</div>
+
+</div>
 
 
 
-<script>
+<!-- BOTTOM -->
+<div class="bottom">
 
+<div class="games">
+Noch keine Spiele verfügbar
+</div>
 
-const status =
-document.getElementById("status");
-
-
-
-const socket = new WebSocket(
-
-"wss://gzx.onrender.com"
-
-);
-
-
-
-socket.onopen = ()=>{
-
-
-status.innerHTML =
-"✅ Mit Server verbunden";
-
-
-console.log(
-"Server verbunden"
-);
-
-
-};
-
-
-
-socket.onerror = ()=>{
-
-
-status.innerHTML =
-"❌ Server Fehler";
-
-
-};
-
-
-
-socket.onclose = ()=>{
-
-
-status.innerHTML =
-"Server getrennt";
-
-
-};
-
-
-
-</script>
+</div>
 
 
 
 </body>
-
 </html>
