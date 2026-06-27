@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+<title>Battle X</title>
+
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial, Helvetica, sans-serif;
+}
+
+
+body{
+
+height:100vh;
+overflow:hidden;
+
+background-image:url("loading.png");
+
+background-size:cover;
+
+background-position:center;
+
+color:white;
+
+}
+
+
+
+/* dunkler Effekt */
+
+body::before{
+
+content:"";
+
+position:absolute;
+
+inset:0;
+
+background:
+linear-gradient(
+rgba(0,0,0,0.45),
+rgba(0,0,0,0.65)
+);
+
+}
+
+
+
+/* Menü */
+
+.menu{
+
+position:absolute;
+
+top:50%;
+left:50%;
+
+transform:translate(-50%,-50%);
+
+text-align:center;
+
+animation:appear 1.5s;
+
+}
+
+
+
+/* Logo */
+
+.logo{
+
+font-size:100px;
+
+font-weight:900;
+
+letter-spacing:10px;
+
+text-transform:uppercase;
+
+
+text-shadow:
+
+0 0 20px cyan,
+
+0 0 50px blue;
+
+
+margin-bottom:70px;
+
+
+animation:pulse 2s infinite;
+
+}
+
+
+
+@keyframes pulse{
+
+50%{
+
+transform:scale(1.08);
+
+}
+
+}
+
+
+
+/* Button */
+
+.start{
+
+
+width:360px;
+
+
+padding:25px;
+
+
+border-radius:25px;
+
+
+border:3px solid white;
+
+
+
+background:
+
+linear-gradient(
+
+45deg,
+
+#00ffff,
+
+#0066ff
+
+);
+
+
+
+color:white;
+
+
+font-size:38px;
+
+
+font-weight:bold;
+
+
+cursor:pointer;
+
+
+
+box-shadow:
+
+
+0 0 30px cyan,
+
+0 0 80px blue;
+
+
+
+transition:.3s;
+
+
+}
+
+
+
+.start:hover{
+
+
+transform:scale(1.15);
+
+
+
+box-shadow:
+
+
+0 0 50px white,
+
+0 0 120px cyan;
+
+
+}
+
+
+
+/* Link ohne Farbe */
+
+a{
+
+text-decoration:none;
+
+}
+
+
+
+@keyframes appear{
+
+
+from{
+
+opacity:0;
+
+transform:translate(-50%,-40%);
+
+}
+
+
+to{
+
+opacity:1;
+
+transform:translate(-50%,-50%);
+
+}
+
+}
+
+
+
+</style>
+
+
+</head>
+
+
+<body>
+
+
+
+<div class="menu">
+
+
+<div class="logo">
+
+BATTLE X
+
+</div>
+
+
+
+<a href="1.html">
+
+<button class="start">
+
+▶ START
+
+</button>
+
+</a>
+
+
+
+</div>
+
+
+
+</body>
+
+</html>
