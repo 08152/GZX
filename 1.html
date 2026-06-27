@@ -16,136 +16,109 @@ font-family:Arial;
 
 body{
 height:100vh;
-display:flex;
-flex-direction:column;
 overflow:hidden;
-background:#000;
 }
 
-/* =======================
-   TOP (BACKGROUND)
-======================= */
+/* ================= BACKGROUND ================= */
 
-.top{
-height:55%;
+.background{
+position:fixed;
+width:100%;
+height:100%;
 
-/* wichtig: gleiches System wie index.html */
 background:url("1.png") center/cover no-repeat;
-
-position:relative;
-
-display:flex;
-justify-content:center;
-align-items:center;
 }
 
-/* dunkler overlay */
-.top::after{
+/* dunkler overlay optional */
+.background::after{
 content:"";
 position:absolute;
 inset:0;
-background:rgba(0,0,0,0.45);
-}
-
-/* center content */
-.center{
-z-index:2;
-display:flex;
-flex-direction:column;
-align-items:center;
-gap:20px;
-}
-
-/* =======================
-   3D CUBE
-======================= */
-
-.scene{
-display:flex;
-flex-direction:column;
-align-items:center;
-}
-
-.cube{
-width:90px;
-height:90px;
-position:relative;
-
-transform-style:preserve-3d;
-animation:spin 4s linear infinite;
-}
-
-.face{
-position:absolute;
-width:90px;
-height:90px;
-background:linear-gradient(135deg,#00c6ff,#0066ff);
-border:1px solid rgba(255,255,255,0.8);
-box-shadow:inset 0 0 10px rgba(255,255,255,0.3);
-}
-
-/* 6 Seiten */
-.front  { transform:rotateY(0deg) translateZ(45px); }
-.back   { transform:rotateY(180deg) translateZ(45px); }
-.right  { transform:rotateY(90deg) translateZ(45px); }
-.left   { transform:rotateY(-90deg) translateZ(45px); }
-.topf   { transform:rotateX(90deg) translateZ(45px); }
-.bottom { transform:rotateX(-90deg) translateZ(45px); }
-
-@keyframes spin{
-0%{ transform:rotateX(0) rotateY(0); }
-100%{ transform:rotateX(360deg) rotateY(360deg); }
-}
-
-/* PLATFORM */
-.platform{
-width:180px;
-height:18px;
-background:linear-gradient(90deg,#111,#00c6ff,#111);
-border-radius:50px;
-box-shadow:0 0 25px #00c6ff;
-margin-top:10px;
-}
-
-/* =======================
-   BOTTOM (GAMES)
-======================= */
-
-.bottom{
-height:45%;
-background:linear-gradient(135deg,#00c6ff,#0072ff);
-display:flex;
-justify-content:center;
-align-items:center;
-}
-
-.games{
-width:80%;
-height:70%;
-
 background:rgba(0,0,0,0.25);
-backdrop-filter:blur(12px);
+}
 
-border-radius:25px;
+/* ================= TOP UI ================= */
 
+.topbar{
+position:absolute;
+top:20px;
+width:100%;
 display:flex;
 justify-content:center;
-align-items:center;
+z-index:5;
+}
 
-color:white;
+.start-btn{
+background:yellow;
+border:none;
+padding:15px 40px;
 font-size:22px;
+font-weight:bold;
+border-radius:12px;
+cursor:pointer;
+box-shadow:0 0 20px yellow;
+transition:0.3s;
+}
 
-border:1px solid rgba(255,255,255,0.3);
+.start-btn:hover{
+transform:scale(1.1);
+}
 
+/* ================= HAMBURGER ================= */
+
+.hamburger{
+position:absolute;
+top:25px;
+right:25px;
+width:40px;
+height:30px;
+cursor:pointer;
+z-index:10;
+}
+
+.hamburger div{
+height:4px;
+background:white;
+margin:6px 0;
+border-radius:3px;
+}
+
+/* ================= SIDE MENU ================= */
+
+.menu{
+position:absolute;
+top:0;
+right:-260px;
+width:260px;
+height:100%;
+background:rgba(0,0,0,0.85);
+backdrop-filter:blur(10px);
+transition:0.4s;
+z-index:9;
+padding-top:80px;
+}
+
+.menu.open{
+right:0;
+}
+
+/* icons */
+.menu img{
+width:120px;
+display:block;
+margin:20px auto;
 cursor:pointer;
 transition:0.3s;
 }
 
-/* AAA HOVER */
-.games:hover{
-transform:scale(1.05);
-box-shadow:0 0 40px rgba(0,198,255,0.8);
-border:1px solid cyan;
+.menu img:hover{
+transform:scale(1.1);
+}
+
+/* ================= LINKS ================= */
+
+a{
+text-decoration:none;
 }
 
 </style>
@@ -155,41 +128,46 @@ border:1px solid cyan;
 <body>
 
 
-<!-- TOP -->
-<div class="top">
+<!-- BACKGROUND -->
+<div class="background"></div>
 
-<div class="center">
 
-<div class="scene">
-
-<div class="cube">
-
-<div class="face front"></div>
-<div class="face back"></div>
-<div class="face right"></div>
-<div class="face left"></div>
-<div class="face topf"></div>
-<div class="face bottom"></div>
-
-</div>
-
-<div class="platform"></div>
-
-</div>
-
-</div>
-
+<!-- START BUTTON -->
+<div class="topbar">
+<button class="start-btn">START</button>
 </div>
 
 
-<!-- BOTTOM -->
-<div class="bottom">
-
-<div class="games">
-Noch keine Spiele verfügbar
+<!-- HAMBURGER -->
+<div class="hamburger" onclick="toggleMenu()">
+<div></div>
+<div></div>
+<div></div>
 </div>
 
+
+<!-- MENU -->
+<div class="menu" id="menu">
+
+<a href="shop.html">
+<img src="1_icon.png">
+</a>
+
+<a href="gun.html">
+<img src="2_icon.png">
+</a>
+
 </div>
+
+
+<script>
+
+function toggleMenu(){
+document.getElementById("menu")
+.classList.toggle("open");
+}
+
+</script>
 
 
 </body>
