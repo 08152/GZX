@@ -1,19 +1,27 @@
 const WebSocket = require("ws");
+const http = require("http");
 
 
-const server = new WebSocket.Server({
-    port: 3000
+// einfacher HTTP Server für Render
+const server = http.createServer((req,res)=>{
+
+    res.writeHead(200);
+    res.end("Battle X Server läuft");
+
+});
+
+
+// WebSocket Server
+const wss = new WebSocket.Server({
+    server
 });
 
 
 let players = [];
 
 
-console.log("Server läuft auf Port 3000");
 
-
-
-server.on("connection", socket => {
+wss.on("connection", socket => {
 
 
     console.log("Spieler verbunden");
@@ -23,21 +31,30 @@ server.on("connection", socket => {
 
 
 
-    socket.on("message", message => {
+    socket.send(JSON.stringify({
+        type:"welcome",
+        message:"Verbunden mit Battle X Server"
+    }));
 
 
-        console.log("Daten:", message.toString());
 
+    socket.on("message", data=>{
+
+
+        console.log(
+            "Nachricht:",
+            data.toString()
+        );
 
 
         // an alle Spieler senden
 
-        players.forEach(player => {
+        players.forEach(player=>{
 
 
             if(player.readyState === WebSocket.OPEN){
 
-                player.send(message.toString());
+                player.send(data.toString());
 
             }
 
@@ -55,13 +72,31 @@ server.on("connection", socket => {
         console.log("Spieler getrennt");
 
 
-        players = players.filter(
+        players =
+        players.filter(
             p => p !== socket
         );
 
 
     });
 
+
+
+});
+
+
+
+// Render Port
+
+const PORT = process.env.PORT || 3000;
+
+
+server.listen(PORT,()=>{
+
+
+console.log(
+"Server läuft auf Port " + PORT
+);
 
 
 });
