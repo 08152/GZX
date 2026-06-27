@@ -22,26 +22,24 @@ overflow:hidden;
 background:#000;
 }
 
-
 /* =======================
-   TOP AREA (BACKGROUND = 1.png)
+   TOP (BACKGROUND)
 ======================= */
 
 .top{
 height:55%;
 
-background:url("1.png");
-background-size:cover;
-background-position:center;
+/* wichtig: gleiches System wie index.html */
+background:url("1.png") center/cover no-repeat;
+
+position:relative;
 
 display:flex;
 justify-content:center;
 align-items:center;
-
-position:relative;
 }
 
-/* dunkler Overlay */
+/* dunkler overlay */
 .top::after{
 content:"";
 position:absolute;
@@ -49,8 +47,7 @@ inset:0;
 background:rgba(0,0,0,0.45);
 }
 
-
-/* CENTER */
+/* center content */
 .center{
 z-index:2;
 display:flex;
@@ -59,9 +56,8 @@ align-items:center;
 gap:20px;
 }
 
-
 /* =======================
-   CUBE + PLATFORM
+   3D CUBE
 ======================= */
 
 .scene{
@@ -70,40 +66,25 @@ flex-direction:column;
 align-items:center;
 }
 
-.platform{
-width:180px;
-height:18px;
-
-background:linear-gradient(90deg,#111,#00c6ff,#111);
-border-radius:50px;
-
-box-shadow:0 0 25px #00c6ff;
-}
-
-
 .cube{
 width:90px;
 height:90px;
-
 position:relative;
 
 transform-style:preserve-3d;
-
 animation:spin 4s linear infinite;
-margin-bottom:10px;
 }
 
 .face{
 position:absolute;
 width:90px;
 height:90px;
-
 background:linear-gradient(135deg,#00c6ff,#0066ff);
 border:1px solid rgba(255,255,255,0.8);
 box-shadow:inset 0 0 10px rgba(255,255,255,0.3);
 }
 
-/* alle Seiten */
+/* 6 Seiten */
 .front  { transform:rotateY(0deg) translateZ(45px); }
 .back   { transform:rotateY(180deg) translateZ(45px); }
 .right  { transform:rotateY(90deg) translateZ(45px); }
@@ -111,29 +92,33 @@ box-shadow:inset 0 0 10px rgba(255,255,255,0.3);
 .topf   { transform:rotateX(90deg) translateZ(45px); }
 .bottom { transform:rotateX(-90deg) translateZ(45px); }
 
-
 @keyframes spin{
 0%{ transform:rotateX(0) rotateY(0); }
 100%{ transform:rotateX(360deg) rotateY(360deg); }
 }
 
+/* PLATFORM */
+.platform{
+width:180px;
+height:18px;
+background:linear-gradient(90deg,#111,#00c6ff,#111);
+border-radius:50px;
+box-shadow:0 0 25px #00c6ff;
+margin-top:10px;
+}
 
 /* =======================
-   BOTTOM AREA
+   BOTTOM (GAMES)
 ======================= */
 
 .bottom{
 height:45%;
-
 background:linear-gradient(135deg,#00c6ff,#0072ff);
-
 display:flex;
 justify-content:center;
 align-items:center;
 }
 
-
-/* GAMES BOX */
 .games{
 width:80%;
 height:70%;
@@ -153,12 +138,10 @@ font-size:22px;
 border:1px solid rgba(255,255,255,0.3);
 
 cursor:pointer;
-
 transition:0.3s;
 }
 
-
-/* AAA HOVER EFFECT */
+/* AAA HOVER */
 .games:hover{
 transform:scale(1.05);
 box-shadow:0 0 40px rgba(0,198,255,0.8);
@@ -179,7 +162,6 @@ border:1px solid cyan;
 
 <div class="scene">
 
-<!-- CUBE -->
 <div class="cube">
 
 <div class="face front"></div>
@@ -191,7 +173,6 @@ border:1px solid cyan;
 
 </div>
 
-<!-- PLATFORM -->
 <div class="platform"></div>
 
 </div>
@@ -199,7 +180,6 @@ border:1px solid cyan;
 </div>
 
 </div>
-
 
 
 <!-- BOTTOM -->
@@ -212,6 +192,6 @@ Noch keine Spiele verfügbar
 </div>
 
 
-
 </body>
+
 </html>
