@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+<title>Battle X Online</title>
+
+<style>
+
+body{
+
+margin:0;
+
+height:100vh;
+
+background:white;
+
+}
+
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<script>
+
+
+const socket = new WebSocket(
+"ws://localhost:3000"
+);
+
+
+
+socket.onopen = ()=>{
+
+console.log("Mit Server verbunden");
+
+};
+
+
+
+socket.onmessage = (event)=>{
+
+console.log(
+"Server:",
+event.data
+);
+
+};
+
+
+
+</script>
+
+
+</body>
+
+</html>
