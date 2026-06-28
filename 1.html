@@ -2,8 +2,10 @@
 <html>
 
 <head>
+
 <meta charset="UTF-8">
 <title>Battle X Lobby</title>
+
 
 <style>
 
@@ -11,111 +13,457 @@
 margin:0;
 padding:0;
 box-sizing:border-box;
-font-family:Arial;
+font-family:Arial, sans-serif;
 }
+
 
 body{
+
 height:100vh;
 overflow:hidden;
+
+background:black;
+
 }
 
-/* ================= BACKGROUND ================= */
+
+/* =====================
+   BACKGROUND
+===================== */
+
 
 .background{
+
 position:fixed;
+
+top:0;
+left:0;
+
 width:100%;
 height:100%;
-background:url("1.png") center/cover no-repeat;
+
+
+background-image:url("./1.png");
+
+background-size:cover;
+
+background-position:center;
+
+background-repeat:no-repeat;
+
+
+z-index:0;
+
 }
 
-/* overlay */
+
+/* dunkler Effekt */
+
 .background::after{
+
 content:"";
+
 position:absolute;
+
 inset:0;
+
 background:rgba(0,0,0,0.25);
+
 }
 
-/* ================= START BUTTON ================= */
+
+
+/* =====================
+   START BUTTON
+===================== */
+
 
 .topbar{
+
 position:absolute;
+
 top:20px;
+
 width:100%;
+
+
 display:flex;
+
 justify-content:center;
+
+
 z-index:5;
+
 }
+
+
 
 .start-btn{
-background:yellow;
+
+
+background:#ffd900;
+
+
 border:none;
-padding:15px 45px;
-font-size:22px;
+
+
+padding:15px 50px;
+
+
+font-size:24px;
+
+
 font-weight:bold;
-border-radius:12px;
+
+
+border-radius:15px;
+
+
 cursor:pointer;
-box-shadow:0 0 20px yellow;
+
+
+box-shadow:
+0 0 20px yellow;
+
+
 transition:0.3s;
+
+
 }
+
+
 
 .start-btn:hover{
+
+
 transform:scale(1.1);
+
+
 }
 
-/* ================= HAMBURGER ================= */
+
+
+/* =====================
+   HAMBURGER
+===================== */
+
 
 .hamburger{
+
+
 position:absolute;
+
+
 top:25px;
+
 right:25px;
-width:40px;
-height:30px;
+
+
+width:45px;
+
+
 cursor:pointer;
+
+
 z-index:10;
+
+
 }
+
+
 
 .hamburger div{
-height:4px;
+
+
+height:5px;
+
+
 background:white;
-margin:6px 0;
-border-radius:3px;
+
+
+margin:7px 0;
+
+
+border-radius:5px;
+
+
 }
 
-/* ================= MENU ================= */
+
+
+/* =====================
+   MENU
+===================== */
+
 
 .menu{
+
+
 position:absolute;
+
+
 top:0;
-right:-260px;
-width:260px;
+
+
+right:-280px;
+
+
+width:280px;
+
+
 height:100%;
+
+
 background:rgba(0,0,0,0.85);
+
+
 backdrop-filter:blur(10px);
+
+
 transition:0.4s;
+
+
 z-index:9;
-padding-top:80px;
+
+
+padding-top:90px;
+
+
 }
+
+
 
 .menu.open{
+
+
 right:0;
+
+
 }
+
+
+
+/* ICON */
+
 
 .menu img{
-width:120px;
+
+
+width:130px;
+
+
 display:block;
-margin:20px auto;
+
+
+margin:25px auto;
+
+
 cursor:pointer;
+
+
 transition:0.3s;
+
+
 }
+
+
 
 .menu img:hover{
+
+
 transform:scale(1.1);
+
+
 }
 
-/* ================= STATUS TEXT ================= */
+
+
+/* =====================
+   STATUS
+===================== */
+
 
 .status{
+
+
 position:absolute;
+
+
 bottom:20px;
+
+
 width:100%;
+
+
+text-align:center;
+
+
+color:white;
+
+
+font-size:20px;
+
+
+z-index:5;
+
+
+}
+
+
+
+</style>
+
+
+</head>
+
+
+
+<body>
+
+
+
+<!-- Hintergrund -->
+
+<div class="background"></div>
+
+
+
+<!-- Start -->
+
+<div class="topbar">
+
+
+<button class="start-btn">
+
+START
+
+</button>
+
+
+</div>
+
+
+
+<!-- Menü Button -->
+
+
+<div class="hamburger" onclick="toggleMenu()">
+
+
+<div></div>
+
+<div></div>
+
+<div></div>
+
+
+</div>
+
+
+
+<!-- Seiten Menü -->
+
+
+<div class="menu" id="menu">
+
+
+<img 
+src="2_icon.png"
+
+onclick="location.href='gun.html'"
+
+onerror="this.style.display='none'"
+
+>
+
+
+</div>
+
+
+
+<!-- Server Status -->
+
+
+<div class="status" id="status">
+
+
+🔌 Verbinde mit Server...
+
+
+</div>
+
+
+
+
+<script>
+
+
+// Menü öffnen/schließen
+
+function toggleMenu(){
+
+
+document
+.getElementById("menu")
+.classList.toggle("open");
+
+
+}
+
+
+
+// WebSocket
+
+
+const status =
+document.getElementById("status");
+
+
+
+const socket =
+new WebSocket(
+"wss://gzx.onrender.com"
+);
+
+
+
+socket.onopen = function(){
+
+
+status.innerHTML =
+"✅ Online verbunden";
+
+
+};
+
+
+
+socket.onerror = function(){
+
+
+status.innerHTML =
+"❌ Server Fehler";
+
+
+};
+
+
+
+socket.onclose = function(){
+
+
+status.innerHTML =
+"⚠ Verbindung getrennt";
+
+
+};
+
+
+
+</script>
+
+
+
+</body>
+
+</html>
