@@ -4,7 +4,7 @@
 <head>
 
 <meta charset="UTF-8">
-<title>Battle X Mega World</title>
+<title>Battle X Arena</title>
 
 <style>
 
@@ -33,16 +33,17 @@ z-index:5;
 }
 
 
-/* LIFE BAR */
 
 #healthBox{
 
 position:absolute;
 
 right:30px;
+
 bottom:30px;
 
 width:300px;
+
 height:35px;
 
 background:#222;
@@ -67,13 +68,12 @@ width:100%;
 
 background:limegreen;
 
-transition:0.2s;
-
 }
 
 
 
 </style>
+
 
 </head>
 
@@ -82,9 +82,9 @@ transition:0.2s;
 
 
 <div id="info">
-Klick = Maus aktivieren<br>
-WASD bewegen<br>
-Leertaste springen
+Klick = Maus<br>
+WASD = bewegen<br>
+SPACE = springen
 </div>
 
 
@@ -98,7 +98,6 @@ Leertaste springen
 
 
 
-
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 
 
@@ -107,12 +106,20 @@ Leertaste springen
 
 
 
+
+// =================
+// BASIC
+// =================
+
+
 const scene =
 new THREE.Scene();
 
 
 scene.background =
-new THREE.Color(0x87ceeb);
+new THREE.Color(
+0x87ceeb
+);
 
 
 
@@ -149,7 +156,7 @@ renderer.domElement
 const light =
 new THREE.DirectionalLight(
 0xffffff,
-3
+4
 );
 
 
@@ -167,34 +174,41 @@ scene.add(light);
 
 
 
+// =================
 // TEXTUR
+// =================
 
 
 const texture =
 new THREE.TextureLoader()
-.load("textur.png");
+.load(
+"textur.png"
+);
 
 
 
 
 
 
+
+// =================
 // BLOCK
+// =================
 
 
-const blockSize=4;
+const SIZE = 4;
 
 
-function block(x,y,z){
+function createBlock(x,y,z){
 
 
 let b =
 new THREE.Mesh(
 
 new THREE.BoxGeometry(
-blockSize,
-blockSize,
-blockSize
+SIZE,
+SIZE,
+SIZE
 ),
 
 new THREE.MeshStandardMaterial({
@@ -206,14 +220,12 @@ map:texture
 );
 
 
-
 b.position.set(
 x,y,z
 );
 
 
 return b;
-
 
 }
 
@@ -222,7 +234,9 @@ return b;
 
 
 
+// =================
 // CHUNKS
+// =================
 
 
 const chunkSize=20;
@@ -234,10 +248,11 @@ let chunks={};
 function loadChunk(cx,cz){
 
 
-let key=cx+"_"+cz;
+let id =
+cx+"_"+cz;
 
 
-if(chunks[key])
+if(chunks[id])
 return;
 
 
@@ -250,22 +265,27 @@ new THREE.Group();
 for(
 let x=0;
 x<chunkSize;
-x+=blockSize
+x+=SIZE
 ){
+
 
 for(
 let z=0;
 z<chunkSize;
-z+=blockSize
+z+=SIZE
 ){
 
 
 group.add(
 
-block(
+createBlock(
+
 cx*chunkSize+x,
--50,
+
+-300,
+
 cz*chunkSize+z
+
 )
 
 );
@@ -280,7 +300,7 @@ cz*chunkSize+z
 scene.add(group);
 
 
-chunks[key]=group;
+chunks[id]=group;
 
 
 }
@@ -288,13 +308,15 @@ chunks[key]=group;
 
 
 
-function removeChunks(cx,cz){
+
+function deleteChunks(cx,cz){
 
 
-for(let key in chunks){
+for(let id in chunks){
 
 
-let p=key.split("_");
+let p=id.split("_");
+
 
 
 if(
@@ -304,11 +326,11 @@ Math.abs(p[1]-cz)>5
 
 
 scene.remove(
-chunks[key]
+chunks[id]
 );
 
 
-delete chunks[key];
+delete chunks[id];
 
 
 }
@@ -324,7 +346,179 @@ delete chunks[key];
 
 
 
+
+
+
+// =================
+// ARENA BODEN
+// =================
+
+
+for(
+let x=-200;
+x<=200;
+x+=SIZE
+){
+
+for(
+let z=-200;
+z<=200;
+z+=SIZE
+){
+
+
+scene.add(
+
+createBlock(
+x,
+-300,
+z
+)
+
+);
+
+
+}
+
+}
+
+
+
+
+
+
+
+// =================
+// WÄNDE OHNE DECKE
+// =================
+
+
+const wall=300;
+
+
+for(
+let y=-300;
+y<=100;
+y+=SIZE
+){
+
+
+for(
+let x=-200;
+x<=200;
+x+=SIZE
+){
+
+
+scene.add(
+
+createBlock(
+x,
+y,
+-200
+)
+
+);
+
+
+scene.add(
+
+createBlock(
+x,
+y,
+200
+)
+
+);
+
+
+}
+
+
+
+for(
+let z=-200;
+z<=200;
+z+=SIZE
+){
+
+
+scene.add(
+
+createBlock(
+-200,
+y,
+z
+)
+
+);
+
+
+
+scene.add(
+
+createBlock(
+200,
+y,
+z
+)
+
+);
+
+
+}
+
+
+}
+
+
+
+
+
+// =================
+// SPAWN PLATTFORM
+// =================
+
+
+for(
+let x=-120;
+x<=120;
+x+=SIZE
+){
+
+
+for(
+let z=-120;
+z<=120;
+z+=SIZE
+){
+
+
+scene.add(
+
+createBlock(
+x,
+450,
+z
+)
+
+);
+
+
+}
+
+}
+
+
+
+
+
+
+
+
+// =================
 // PLAYER
+// =================
 
 
 const player =
@@ -336,7 +530,7 @@ scene.add(player);
 
 player.position.set(
 0,
-500,
+454,
 0
 );
 
@@ -351,79 +545,40 @@ camera.position.y=2;
 
 
 
-// SPAWN PLATTFORM
 
-
-for(
-let x=-100;
-x<=100;
-x+=blockSize
-){
-
-for(
-let z=-100;
-z<=100;
-z+=blockSize
-){
-
-
-scene.add(
-block(
-x,
-450,
-z
-)
-);
-
-
-}
-
-}
-
-
-
-
-
-
-
+// =================
 // PHYSIK
+// =================
 
 
 let velocityY=0;
 
-let gravity=0.03;
 
-let jump=1;
-
-let ground=false;
+let gravity=0.04;
 
 
-
-// HEALTH
+let canJump=false;
 
 
 let health=100;
 
 
-const bar =
+const hp=
 document.getElementById(
 "healthBar"
 );
 
 
 
-function damage(value){
 
 
-health-=value;
+function damage(x){
 
 
-if(health<0)
-health=0;
+health-=x;
 
 
-
-bar.style.width=
+hp.style.width=
 health+"%";
 
 
@@ -434,12 +589,12 @@ if(health<=0){
 health=100;
 
 
-bar.style.width="100%";
+hp.style.width="100%";
 
 
 player.position.set(
 0,
-500,
+454,
 0
 );
 
@@ -447,6 +602,7 @@ player.position.set(
 }
 
 
+
 }
 
 
@@ -455,8 +611,9 @@ player.position.set(
 
 
 
-
+// =================
 // MOUSE
+// =================
 
 
 let rx=0;
@@ -485,6 +642,7 @@ ry-=e.movementX*0.002;
 rx-=e.movementY*0.002;
 
 
+
 rx=Math.max(
 -1.5,
 Math.min(1.5,rx)
@@ -493,6 +651,7 @@ Math.min(1.5,rx)
 
 
 camera.rotation.x=rx;
+
 
 player.rotation.y=ry;
 
@@ -508,11 +667,12 @@ player.rotation.y=ry;
 
 
 
-// TASTEN
+// =================
+// MOVEMENT
+// =================
 
 
 let keys={};
-
 
 
 document.onkeydown=e=>{
@@ -524,13 +684,14 @@ keys[e.key.toLowerCase()]=true;
 
 if(
 e.code==="Space" &&
-ground
+canJump
 ){
 
 
-velocityY=jump;
+velocityY=1;
 
-ground=false;
+
+canJump=false;
 
 
 }
@@ -543,11 +704,10 @@ ground=false;
 
 document.onkeyup=e=>{
 
-
 keys[e.key.toLowerCase()]=false;
 
-
 };
+
 
 
 
@@ -559,35 +719,33 @@ function update(){
 
 
 
-// Bewegung
-
-
-let dir =
+let move =
 new THREE.Vector3();
 
 
 
 if(keys.w)
-dir.z-=1;
+move.z-=1;
 
 
 if(keys.s)
-dir.z+=1;
+move.z+=1;
 
 
 if(keys.a)
-dir.x-=1;
+move.x-=1;
 
 
 if(keys.d)
-dir.x+=1;
+move.x+=1;
 
 
 
-dir.normalize();
+move.normalize();
 
 
-dir.applyAxisAngle(
+
+move.applyAxisAngle(
 new THREE.Vector3(0,1,0),
 player.rotation.y
 );
@@ -595,7 +753,7 @@ player.rotation.y
 
 
 player.position.add(
-dir
+move
 );
 
 
@@ -604,7 +762,7 @@ dir
 
 
 
-// Gravitation
+// GRAVITY
 
 
 velocityY-=gravity;
@@ -616,17 +774,21 @@ player.position.y+=velocityY;
 
 
 
+// nur Spawn Plattform hält
 
-if(player.position.y<=452){
+if(
+player.position.y<=454 &&
+player.position.y>400
+){
 
 
-player.position.y=452;
+player.position.y=454;
 
 
 velocityY=0;
 
 
-ground=true;
+canJump=true;
 
 
 }
@@ -635,20 +797,23 @@ ground=true;
 
 
 
-// Fallen
 
 
-if(player.position.y<-200){
+// fallen in Arena möglich
+
+if(player.position.y<-500){
 
 
 damage(25);
 
 
+
 player.position.set(
 0,
-500,
+454,
 0
 );
+
 
 
 }
@@ -657,7 +822,8 @@ player.position.set(
 
 
 
-// CHUNKS
+
+// chunks
 
 
 let cx=
@@ -698,7 +864,7 @@ cz+z
 
 
 
-removeChunks(
+deleteChunks(
 cx,
 cz
 );
@@ -723,6 +889,7 @@ animate
 update();
 
 
+
 renderer.render(
 scene,
 camera
@@ -730,6 +897,7 @@ camera
 
 
 }
+
 
 
 animate();
