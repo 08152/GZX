@@ -4,7 +4,7 @@
 <head>
 
 <meta charset="UTF-8">
-<title>Battle X Mega Arena</title>
+<title>Battle X Mega World</title>
 
 <style>
 
@@ -18,38 +18,102 @@ canvas{
 display:block;
 }
 
+
 #info{
+
 position:absolute;
 top:20px;
 left:20px;
+
 color:white;
 font-family:Arial;
-font-size:22px;
+
 z-index:5;
+
 }
+
+
+/* LIFE BAR */
+
+#healthBox{
+
+position:absolute;
+
+right:30px;
+bottom:30px;
+
+width:300px;
+height:35px;
+
+background:#222;
+
+border:3px solid white;
+
+border-radius:10px;
+
+overflow:hidden;
+
+z-index:5;
+
+}
+
+
+
+#healthBar{
+
+height:100%;
+
+width:100%;
+
+background:limegreen;
+
+transition:0.2s;
+
+}
+
+
 
 </style>
 
 </head>
 
+
 <body>
 
 
 <div id="info">
-WASD = bewegen
+Klick = Maus aktivieren<br>
+WASD bewegen<br>
+Leertaste springen
 </div>
+
+
+
+<div id="healthBox">
+
+<div id="healthBar"></div>
+
+</div>
+
+
+
 
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 
 
+
 <script>
 
 
-const scene = new THREE.Scene();
+
+const scene =
+new THREE.Scene();
+
 
 scene.background =
-new THREE.Color(0x111111);
+new THREE.Color(0x87ceeb);
+
 
 
 
@@ -58,15 +122,7 @@ new THREE.PerspectiveCamera(
 75,
 innerWidth/innerHeight,
 0.1,
-10000
-);
-
-
-
-camera.position.set(
-0,
-200,
-800
+100000
 );
 
 
@@ -90,19 +146,17 @@ renderer.domElement
 
 
 
-// Licht
-
 const light =
 new THREE.DirectionalLight(
 0xffffff,
-5
+3
 );
 
 
 light.position.set(
 0,
 1000,
-500
+0
 );
 
 
@@ -113,9 +167,7 @@ scene.add(light);
 
 
 
-// =======================
 // TEXTUR
-// =======================
 
 
 const texture =
@@ -124,266 +176,30 @@ new THREE.TextureLoader()
 
 
 
-texture.wrapS =
-THREE.RepeatWrapping;
-
-
-texture.wrapT =
-THREE.RepeatWrapping;
-
-
-texture.repeat.set(
-2,
-2
-);
 
 
 
-
-
-
-// =======================
 // BLOCK
-// =======================
 
 
-function block(x,y,z,size){
+const blockSize=4;
 
 
-const geo =
-new THREE.BoxGeometry(
-size,
-size,
-size
-);
+function block(x,y,z){
 
 
-
-const mat =
-new THREE.MeshStandardMaterial({
-
-map:texture
-
-});
-
-
-
-const cube =
-new THREE.Mesh(
-geo,
-mat
-);
-
-
-
-cube.position.set(
-x,
-y,
-z
-);
-
-
-
-scene.add(cube);
-
-
-}
-
-
-
-
-
-
-// =======================
-// MEGA ARENA
-// =======================
-
-
-const arenaSize = 2000;
-
-const wallHeight = 500;
-
-const cubeSize = 50;
-
-
-
-// hintere Wand
-
-for(
-let x=-arenaSize/2;
-x<=arenaSize/2;
-x+=cubeSize
-){
-
-for(
-let y=0;
-y<=wallHeight;
-y+=cubeSize
-){
-
-
-block(
-x,
-y,
--arenaSize/2,
-cubeSize
-);
-
-
-}
-
-}
-
-
-
-
-
-// linke Wand
-
-for(
-let z=-arenaSize/2;
-z<=arenaSize/2;
-z+=cubeSize
-){
-
-for(
-let y=0;
-y<=wallHeight;
-y+=cubeSize
-){
-
-
-block(
--arenaSize/2,
-y,
-z,
-cubeSize
-);
-
-
-}
-
-}
-
-
-
-
-
-// rechte Wand
-
-for(
-let z=-arenaSize/2;
-z<=arenaSize/2;
-z+=cubeSize
-){
-
-for(
-let y=0;
-y<=wallHeight;
-y+=cubeSize
-){
-
-
-block(
-arenaSize/2,
-y,
-z,
-cubeSize
-);
-
-
-}
-
-}
-
-
-
-
-
-// Boden
-
-for(
-let x=-arenaSize/2;
-x<=arenaSize/2;
-x+=cubeSize
-){
-
-for(
-let z=-arenaSize/2;
-z<=arenaSize/2;
-z+=cubeSize
-){
-
-
-block(
-x,
--50,
-z,
-cubeSize
-);
-
-
-}
-
-}
-
-
-
-
-
-
-// =======================
-// SPAWN
-// =======================
-
-
-for(
-let x=-300;
-x<=300;
-x+=cubeSize
-){
-
-for(
-let z=700;
-z<=900;
-z+=cubeSize
-){
-
-
-block(
-x,
-0,
-z,
-cubeSize
-);
-
-
-}
-
-}
-
-
-
-
-
-
-// =======================
-// SPIELER
-// =======================
-
-
-const player =
+let b =
 new THREE.Mesh(
 
 new THREE.BoxGeometry(
-40,
-80,
-40
+blockSize,
+blockSize,
+blockSize
 ),
 
 new THREE.MeshStandardMaterial({
 
-color:0x0099ff
+map:texture
 
 })
 
@@ -391,23 +207,308 @@ color:0x0099ff
 
 
 
-player.position.set(
-0,
-40,
-700
+b.position.set(
+x,y,z
 );
+
+
+return b;
+
+
+}
+
+
+
+
+
+
+// CHUNKS
+
+
+const chunkSize=20;
+
+let chunks={};
+
+
+
+function loadChunk(cx,cz){
+
+
+let key=cx+"_"+cz;
+
+
+if(chunks[key])
+return;
+
+
+
+let group =
+new THREE.Group();
+
+
+
+for(
+let x=0;
+x<chunkSize;
+x+=blockSize
+){
+
+for(
+let z=0;
+z<chunkSize;
+z+=blockSize
+){
+
+
+group.add(
+
+block(
+cx*chunkSize+x,
+-50,
+cz*chunkSize+z
+)
+
+);
+
+
+}
+
+}
+
+
+
+scene.add(group);
+
+
+chunks[key]=group;
+
+
+}
+
+
+
+
+function removeChunks(cx,cz){
+
+
+for(let key in chunks){
+
+
+let p=key.split("_");
+
+
+if(
+Math.abs(p[0]-cx)>5 ||
+Math.abs(p[1]-cz)>5
+){
+
+
+scene.remove(
+chunks[key]
+);
+
+
+delete chunks[key];
+
+
+}
+
+
+}
+
+
+}
+
+
+
+
+
+
+// PLAYER
+
+
+const player =
+new THREE.Object3D();
 
 
 scene.add(player);
 
 
+player.position.set(
+0,
+500,
+0
+);
+
+
+player.add(camera);
+
+
+camera.position.y=2;
 
 
 
 
-// =======================
-// MOVEMENT
-// =======================
+
+
+// SPAWN PLATTFORM
+
+
+for(
+let x=-100;
+x<=100;
+x+=blockSize
+){
+
+for(
+let z=-100;
+z<=100;
+z+=blockSize
+){
+
+
+scene.add(
+block(
+x,
+450,
+z
+)
+);
+
+
+}
+
+}
+
+
+
+
+
+
+
+// PHYSIK
+
+
+let velocityY=0;
+
+let gravity=0.03;
+
+let jump=1;
+
+let ground=false;
+
+
+
+// HEALTH
+
+
+let health=100;
+
+
+const bar =
+document.getElementById(
+"healthBar"
+);
+
+
+
+function damage(value){
+
+
+health-=value;
+
+
+if(health<0)
+health=0;
+
+
+
+bar.style.width=
+health+"%";
+
+
+
+if(health<=0){
+
+
+health=100;
+
+
+bar.style.width="100%";
+
+
+player.position.set(
+0,
+500,
+0
+);
+
+
+}
+
+
+}
+
+
+
+
+
+
+
+
+// MOUSE
+
+
+let rx=0;
+
+let ry=0;
+
+
+
+document.body.onclick=()=>{
+
+document.body.requestPointerLock();
+
+};
+
+
+
+document.onmousemove=e=>{
+
+
+if(document.pointerLockElement){
+
+
+ry-=e.movementX*0.002;
+
+
+rx-=e.movementY*0.002;
+
+
+rx=Math.max(
+-1.5,
+Math.min(1.5,rx)
+);
+
+
+
+camera.rotation.x=rx;
+
+player.rotation.y=ry;
+
+
+}
+
+
+};
+
+
+
+
+
+
+
+// TASTEN
 
 
 let keys={};
@@ -416,7 +517,25 @@ let keys={};
 
 document.onkeydown=e=>{
 
+
 keys[e.key.toLowerCase()]=true;
+
+
+
+if(
+e.code==="Space" &&
+ground
+){
+
+
+velocityY=jump;
+
+ground=false;
+
+
+}
+
+
 
 };
 
@@ -424,7 +543,9 @@ keys[e.key.toLowerCase()]=true;
 
 document.onkeyup=e=>{
 
+
 keys[e.key.toLowerCase()]=false;
+
 
 };
 
@@ -432,46 +553,156 @@ keys[e.key.toLowerCase()]=false;
 
 
 
-function move(){
 
 
-let speed=8;
-
-
-
-if(keys["w"])
-player.position.z-=speed;
-
-
-if(keys["s"])
-player.position.z+=speed;
-
-
-if(keys["a"])
-player.position.x-=speed;
-
-
-if(keys["d"])
-player.position.x+=speed;
+function update(){
 
 
 
-camera.position.x =
-player.position.x;
+// Bewegung
 
 
-camera.position.z =
-player.position.z+600;
-
-
-camera.position.y =
-player.position.y+300;
+let dir =
+new THREE.Vector3();
 
 
 
-camera.lookAt(
-player.position
+if(keys.w)
+dir.z-=1;
+
+
+if(keys.s)
+dir.z+=1;
+
+
+if(keys.a)
+dir.x-=1;
+
+
+if(keys.d)
+dir.x+=1;
+
+
+
+dir.normalize();
+
+
+dir.applyAxisAngle(
+new THREE.Vector3(0,1,0),
+player.rotation.y
 );
+
+
+
+player.position.add(
+dir
+);
+
+
+
+
+
+
+
+// Gravitation
+
+
+velocityY-=gravity;
+
+
+player.position.y+=velocityY;
+
+
+
+
+
+
+if(player.position.y<=452){
+
+
+player.position.y=452;
+
+
+velocityY=0;
+
+
+ground=true;
+
+
+}
+
+
+
+
+
+// Fallen
+
+
+if(player.position.y<-200){
+
+
+damage(25);
+
+
+player.position.set(
+0,
+500,
+0
+);
+
+
+}
+
+
+
+
+
+// CHUNKS
+
+
+let cx=
+Math.floor(
+player.position.x/chunkSize
+);
+
+
+let cz=
+Math.floor(
+player.position.z/chunkSize
+);
+
+
+
+for(
+let x=-5;
+x<=5;
+x++
+){
+
+for(
+let z=-5;
+z<=5;
+z++
+){
+
+
+loadChunk(
+cx+x,
+cz+z
+);
+
+
+}
+
+}
+
+
+
+removeChunks(
+cx,
+cz
+);
+
 
 
 }
@@ -483,12 +714,13 @@ player.position
 
 function animate(){
 
+
 requestAnimationFrame(
 animate
 );
 
 
-move();
+update();
 
 
 renderer.render(
