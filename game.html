@@ -74,7 +74,6 @@ background:limegreen;
 
 </style>
 
-
 </head>
 
 
@@ -88,7 +87,6 @@ SPACE = springen
 </div>
 
 
-
 <div id="healthBox">
 
 <div id="healthBar"></div>
@@ -97,14 +95,11 @@ SPACE = springen
 
 
 
-
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 
 
 
 <script>
-
-
 
 
 // =================
@@ -153,6 +148,7 @@ renderer.domElement
 
 
 
+
 const light =
 new THREE.DirectionalLight(
 0xffffff,
@@ -174,32 +170,22 @@ scene.add(light);
 
 
 
-// =================
-// TEXTUR
-// =================
-
-
-const texture =
-new THREE.TextureLoader()
-.load(
-"textur.png"
-);
-
-
-
-
-
 
 
 // =================
-// BLOCK
+// BLOCK OHNE TEXTUR
 // =================
 
 
 const SIZE = 4;
 
 
-function createBlock(x,y,z){
+function createBlock(
+x,
+y,
+z,
+color=0x555555
+){
 
 
 let b =
@@ -211,13 +197,16 @@ SIZE,
 SIZE
 ),
 
+
 new THREE.MeshStandardMaterial({
 
-map:texture
+color:color
 
 })
 
+
 );
+
 
 
 b.position.set(
@@ -225,119 +214,8 @@ x,y,z
 );
 
 
+
 return b;
-
-}
-
-
-
-
-
-
-// =================
-// CHUNKS
-// =================
-
-
-const chunkSize=20;
-
-let chunks={};
-
-
-
-function loadChunk(cx,cz){
-
-
-let id =
-cx+"_"+cz;
-
-
-if(chunks[id])
-return;
-
-
-
-let group =
-new THREE.Group();
-
-
-
-for(
-let x=0;
-x<chunkSize;
-x+=SIZE
-){
-
-
-for(
-let z=0;
-z<chunkSize;
-z+=SIZE
-){
-
-
-group.add(
-
-createBlock(
-
-cx*chunkSize+x,
-
--300,
-
-cz*chunkSize+z
-
-)
-
-);
-
-
-}
-
-}
-
-
-
-scene.add(group);
-
-
-chunks[id]=group;
-
-
-}
-
-
-
-
-
-function deleteChunks(cx,cz){
-
-
-for(let id in chunks){
-
-
-let p=id.split("_");
-
-
-
-if(
-Math.abs(p[0]-cx)>5 ||
-Math.abs(p[1]-cz)>5
-){
-
-
-scene.remove(
-chunks[id]
-);
-
-
-delete chunks[id];
-
-
-}
-
-
-}
-
 
 }
 
@@ -360,6 +238,7 @@ x<=200;
 x+=SIZE
 ){
 
+
 for(
 let z=-200;
 z<=200;
@@ -372,7 +251,8 @@ scene.add(
 createBlock(
 x,
 -300,
-z
+z,
+0x555555
 )
 
 );
@@ -388,12 +268,10 @@ z
 
 
 
+
 // =================
 // WÄNDE OHNE DECKE
 // =================
-
-
-const wall=300;
 
 
 for(
@@ -401,6 +279,7 @@ let y=-300;
 y<=100;
 y+=SIZE
 ){
+
 
 
 for(
@@ -415,10 +294,12 @@ scene.add(
 createBlock(
 x,
 y,
--200
+-200,
+0x333333
 )
 
 );
+
 
 
 scene.add(
@@ -426,10 +307,12 @@ scene.add(
 createBlock(
 x,
 y,
-200
+200,
+0x333333
 )
 
 );
+
 
 
 }
@@ -448,7 +331,8 @@ scene.add(
 createBlock(
 -200,
 y,
-z
+z,
+0x333333
 )
 
 );
@@ -460,7 +344,8 @@ scene.add(
 createBlock(
 200,
 y,
-z
+z,
+0x333333
 )
 
 );
@@ -469,7 +354,11 @@ z
 }
 
 
+
 }
+
+
+
 
 
 
@@ -478,6 +367,21 @@ z
 // =================
 // SPAWN PLATTFORM
 // =================
+
+
+const spawnMaterial =
+new THREE.MeshStandardMaterial({
+
+color:0x00ffff,
+
+transparent:true,
+
+opacity:0.35
+
+});
+
+
+
 
 
 for(
@@ -494,15 +398,32 @@ z+=SIZE
 ){
 
 
-scene.add(
 
-createBlock(
+let spawn =
+new THREE.Mesh(
+
+new THREE.BoxGeometry(
+SIZE,
+1,
+SIZE
+),
+
+spawnMaterial
+
+);
+
+
+
+spawn.position.set(
 x,
 450,
 z
-)
-
 );
+
+
+
+scene.add(spawn);
+
 
 
 }
@@ -525,17 +446,21 @@ const player =
 new THREE.Object3D();
 
 
+
 scene.add(player);
+
 
 
 player.position.set(
 0,
-454,
+455,
 0
 );
 
 
+
 player.add(camera);
+
 
 
 camera.position.y=2;
@@ -560,10 +485,20 @@ let gravity=0.04;
 let canJump=false;
 
 
+
+
+
+
+
+// =================
+// HEALTH
+// =================
+
+
 let health=100;
 
 
-const hp=
+const hp =
 document.getElementById(
 "healthBar"
 );
@@ -571,14 +506,14 @@ document.getElementById(
 
 
 
-
-function damage(x){
-
-
-health-=x;
+function damage(value){
 
 
-hp.style.width=
+health-=value;
+
+
+
+hp.style.width =
 health+"%";
 
 
@@ -592,18 +527,37 @@ health=100;
 hp.style.width="100%";
 
 
+
+respawn();
+
+
+}
+
+
+}
+
+
+
+
+
+
+
+function respawn(){
+
+
 player.position.set(
 0,
-454,
+455,
 0
 );
 
 
+velocityY=0;
+
+
 }
 
 
-
-}
 
 
 
@@ -627,6 +581,8 @@ document.body.onclick=()=>{
 document.body.requestPointerLock();
 
 };
+
+
 
 
 
@@ -659,7 +615,9 @@ player.rotation.y=ry;
 }
 
 
+
 };
+
 
 
 
@@ -673,6 +631,7 @@ player.rotation.y=ry;
 
 
 let keys={};
+
 
 
 document.onkeydown=e=>{
@@ -697,16 +656,19 @@ canJump=false;
 }
 
 
-
 };
+
 
 
 
 document.onkeyup=e=>{
 
+
 keys[e.key.toLowerCase()]=false;
 
+
 };
+
 
 
 
@@ -762,7 +724,8 @@ move
 
 
 
-// GRAVITY
+
+// FALLEN
 
 
 velocityY-=gravity;
@@ -774,15 +737,24 @@ player.position.y+=velocityY;
 
 
 
-// nur Spawn Plattform hält
+
+
+// Spawn Plattform
 
 if(
-player.position.y<=454 &&
-player.position.y>400
+
+player.position.y<=455 &&
+
+player.position.y>440 &&
+
+Math.abs(player.position.x)<120 &&
+
+Math.abs(player.position.z)<120
+
 ){
 
 
-player.position.y=454;
+player.position.y=455;
 
 
 velocityY=0;
@@ -799,79 +771,57 @@ canJump=true;
 
 
 
-// fallen in Arena möglich
 
-if(player.position.y<-500){
+// Arena Boden
+
+
+if(
+
+player.position.y<=-296 &&
+
+Math.abs(player.position.x)<200 &&
+
+Math.abs(player.position.z)<200
+
+){
+
+
+player.position.y=-296;
+
+
+velocityY=0;
+
+
+canJump=true;
+
+
+}
+
+
+
+
+
+
+
+// aus Welt gefallen
+
+
+if(player.position.y<-600){
 
 
 damage(25);
 
 
-
-player.position.set(
-0,
-454,
-0
-);
-
+respawn();
 
 
 }
 
 
 
-
-
-
-// chunks
-
-
-let cx=
-Math.floor(
-player.position.x/chunkSize
-);
-
-
-let cz=
-Math.floor(
-player.position.z/chunkSize
-);
-
-
-
-for(
-let x=-5;
-x<=5;
-x++
-){
-
-for(
-let z=-5;
-z<=5;
-z++
-){
-
-
-loadChunk(
-cx+x,
-cz+z
-);
-
-
-}
-
 }
 
 
-
-deleteChunks(
-cx,
-cz
-);
-
-
-
-}
 
 
 
@@ -887,7 +837,6 @@ animate
 
 
 update();
-
 
 
 renderer.render(
