@@ -20,16 +20,12 @@ display:block;
 
 
 #info{
-
 position:absolute;
 top:20px;
 left:20px;
-
 color:white;
 font-family:Arial;
-
 z-index:5;
-
 }
 
 
@@ -37,13 +33,10 @@ z-index:5;
 #healthBox{
 
 position:absolute;
-
 right:30px;
-
 bottom:30px;
 
 width:300px;
-
 height:35px;
 
 background:#222;
@@ -71,7 +64,6 @@ background:limegreen;
 }
 
 
-
 </style>
 
 </head>
@@ -80,10 +72,11 @@ background:limegreen;
 <body>
 
 
+
 <div id="info">
 Klick = Maus<br>
-WASD = bewegen<br>
-SPACE = springen
+WASD bewegen<br>
+SPACE springen
 </div>
 
 
@@ -102,9 +95,9 @@ SPACE = springen
 <script>
 
 
-// =================
-// BASIC
-// =================
+// ======================
+// WORLD
+// ======================
 
 
 const scene =
@@ -130,6 +123,7 @@ innerWidth/innerHeight,
 
 
 
+
 const renderer =
 new THREE.WebGLRenderer();
 
@@ -148,11 +142,13 @@ renderer.domElement
 
 
 
+// Licht
+
 
 const light =
 new THREE.DirectionalLight(
 0xffffff,
-4
+5
 );
 
 
@@ -170,25 +166,24 @@ scene.add(light);
 
 
 
-
-
-// =================
+// ======================
 // BLOCK OHNE TEXTUR
-// =================
+// ======================
 
 
-const SIZE = 4;
+const SIZE=4;
 
 
-function createBlock(
+
+function block(
 x,
 y,
 z,
-color=0x555555
+color
 ){
 
 
-let b =
+const cube =
 new THREE.Mesh(
 
 new THREE.BoxGeometry(
@@ -209,13 +204,15 @@ color:color
 
 
 
-b.position.set(
-x,y,z
+cube.position.set(
+x,
+y,
+z
 );
 
 
+return cube;
 
-return b;
 
 }
 
@@ -226,10 +223,9 @@ return b;
 
 
 
-
-// =================
+// ======================
 // ARENA BODEN
-// =================
+// ======================
 
 
 for(
@@ -248,7 +244,7 @@ z+=SIZE
 
 scene.add(
 
-createBlock(
+block(
 x,
 -300,
 z,
@@ -268,10 +264,10 @@ z,
 
 
 
-
-// =================
-// WÄNDE OHNE DECKE
-// =================
+// ======================
+// ARENA WÄNDE
+// KEINE DECKE
+// ======================
 
 
 for(
@@ -289,9 +285,10 @@ x+=SIZE
 ){
 
 
+
 scene.add(
 
-createBlock(
+block(
 x,
 y,
 -200,
@@ -304,7 +301,7 @@ y,
 
 scene.add(
 
-createBlock(
+block(
 x,
 y,
 200,
@@ -316,6 +313,8 @@ y,
 
 
 }
+
+
 
 
 
@@ -326,9 +325,10 @@ z+=SIZE
 ){
 
 
+
 scene.add(
 
-createBlock(
+block(
 -200,
 y,
 z,
@@ -341,7 +341,7 @@ z,
 
 scene.add(
 
-createBlock(
+block(
 200,
 y,
 z,
@@ -351,25 +351,28 @@ z,
 );
 
 
-}
-
-
 
 }
 
 
 
+}
 
 
 
 
 
-// =================
-// SPAWN PLATTFORM
-// =================
 
 
-const spawnMaterial =
+
+
+// ======================
+// SPAWN GLAS
+// ======================
+
+
+
+const glass =
 new THREE.MeshStandardMaterial({
 
 color:0x00ffff,
@@ -399,7 +402,7 @@ z+=SIZE
 
 
 
-let spawn =
+let p =
 new THREE.Mesh(
 
 new THREE.BoxGeometry(
@@ -408,13 +411,13 @@ SIZE,
 SIZE
 ),
 
-spawnMaterial
+glass
 
 );
 
 
 
-spawn.position.set(
+p.position.set(
 x,
 450,
 z
@@ -422,12 +425,12 @@ z
 
 
 
-scene.add(spawn);
-
+scene.add(p);
 
 
 }
 
+
 }
 
 
@@ -437,18 +440,16 @@ scene.add(spawn);
 
 
 
-// =================
+// ======================
 // PLAYER
-// =================
+// ======================
 
 
 const player =
 new THREE.Object3D();
 
 
-
 scene.add(player);
-
 
 
 player.position.set(
@@ -462,7 +463,6 @@ player.position.set(
 player.add(camera);
 
 
-
 camera.position.y=2;
 
 
@@ -471,28 +471,27 @@ camera.position.y=2;
 
 
 
-// =================
+// ======================
 // PHYSIK
-// =================
+// ======================
 
 
 let velocityY=0;
 
-
 let gravity=0.04;
 
+let jumpPower=1;
 
-let canJump=false;
-
-
-
+let grounded=false;
 
 
 
 
-// =================
+
+
+// ======================
 // HEALTH
-// =================
+// ======================
 
 
 let health=100;
@@ -506,51 +505,14 @@ document.getElementById(
 
 
 
-function damage(value){
-
-
-health-=value;
-
-
-
-hp.style.width =
-health+"%";
-
-
-
-if(health<=0){
-
-
-health=100;
-
-
-hp.style.width="100%";
-
-
-
-respawn();
-
-
-}
-
-
-}
-
-
-
-
-
-
 
 function respawn(){
-
 
 player.position.set(
 0,
 455,
 0
 );
-
 
 velocityY=0;
 
@@ -561,13 +523,39 @@ velocityY=0;
 
 
 
+function damage(v){
+
+
+health-=v;
+
+
+hp.style.width =
+health+"%";
+
+
+
+if(health<=0){
+
+health=100;
+
+hp.style.width="100%";
+
+respawn();
+
+}
+
+
+}
 
 
 
 
-// =================
+
+
+
+// ======================
 // MOUSE
-// =================
+// ======================
 
 
 let rx=0;
@@ -625,9 +613,10 @@ player.rotation.y=ry;
 
 
 
-// =================
-// MOVEMENT
-// =================
+
+// ======================
+// KEYS
+// ======================
 
 
 let keys={};
@@ -643,14 +632,14 @@ keys[e.key.toLowerCase()]=true;
 
 if(
 e.code==="Space" &&
-canJump
+grounded
 ){
 
 
-velocityY=1;
+velocityY=jumpPower;
 
 
-canJump=false;
+grounded=false;
 
 
 }
@@ -660,12 +649,9 @@ canJump=false;
 
 
 
-
 document.onkeyup=e=>{
 
-
 keys[e.key.toLowerCase()]=false;
-
 
 };
 
@@ -675,6 +661,10 @@ keys[e.key.toLowerCase()]=false;
 
 
 
+
+// ======================
+// UPDATE
+// ======================
 
 
 function update(){
@@ -703,14 +693,19 @@ move.x+=1;
 
 
 
+
 move.normalize();
 
 
 
 move.applyAxisAngle(
+
 new THREE.Vector3(0,1,0),
+
 player.rotation.y
+
 );
+
 
 
 
@@ -724,8 +719,7 @@ move
 
 
 
-
-// FALLEN
+// gravity
 
 
 velocityY-=gravity;
@@ -739,7 +733,8 @@ player.position.y+=velocityY;
 
 
 
-// Spawn Plattform
+// spawn halten
+
 
 if(
 
@@ -760,7 +755,7 @@ player.position.y=455;
 velocityY=0;
 
 
-canJump=true;
+grounded=true;
 
 
 }
@@ -771,8 +766,7 @@ canJump=true;
 
 
 
-
-// Arena Boden
+// arena boden
 
 
 if(
@@ -792,7 +786,7 @@ player.position.y=-296;
 velocityY=0;
 
 
-canJump=true;
+grounded=true;
 
 
 }
@@ -803,7 +797,7 @@ canJump=true;
 
 
 
-// aus Welt gefallen
+// rausgefallen
 
 
 if(player.position.y<-600){
@@ -828,6 +822,11 @@ respawn();
 
 
 
+// ======================
+// LOOP
+// ======================
+
+
 function animate(){
 
 
@@ -839,14 +838,15 @@ animate
 update();
 
 
+
 renderer.render(
 scene,
 camera
 );
 
 
-}
 
+}
 
 
 animate();
