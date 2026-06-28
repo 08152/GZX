@@ -4,7 +4,7 @@
 <head>
 
 <meta charset="UTF-8">
-<title>Battle X Arena</title>
+<title>Battle X FPS Feel</title>
 
 <style>
 
@@ -14,10 +14,7 @@ overflow:hidden;
 background:black;
 }
 
-canvas{
-display:block;
-}
-
+canvas{display:block;}
 
 #info{
 position:absolute;
@@ -28,834 +25,250 @@ font-family:Arial;
 z-index:5;
 }
 
-
-
 #healthBox{
-
 position:absolute;
 right:30px;
 bottom:30px;
-
 width:300px;
 height:35px;
-
 background:#222;
-
 border:3px solid white;
-
 border-radius:10px;
-
 overflow:hidden;
-
-z-index:5;
-
 }
-
-
 
 #healthBar{
-
 height:100%;
-
 width:100%;
-
 background:limegreen;
-
+transition:0.1s;
 }
-
 
 </style>
 
 </head>
 
-
 <body>
 
-
-
 <div id="info">
-Klick = Maus<br>
 WASD bewegen<br>
-SPACE springen
+SPACE springen<br>
+Klick = Maus lock
 </div>
-
 
 <div id="healthBox">
-
 <div id="healthBar"></div>
-
 </div>
 
-
-
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-
-
 
 <script>
 
 
 // ======================
-// WORLD
+// BASIC SETUP
 // ======================
 
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x87ceeb);
 
-const scene =
-new THREE.Scene();
-
-
-scene.background =
-new THREE.Color(
-0x87ceeb
-);
-
-
-
-
-const camera =
-new THREE.PerspectiveCamera(
+const camera = new THREE.PerspectiveCamera(
 75,
 innerWidth/innerHeight,
 0.1,
 100000
 );
 
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize(innerWidth, innerHeight);
+document.body.appendChild(renderer.domElement);
 
-
-
-
-const renderer =
-new THREE.WebGLRenderer();
-
-
-renderer.setSize(
-innerWidth,
-innerHeight
-);
-
-
-document.body.appendChild(
-renderer.domElement
-);
-
-
-
-
-
-// Licht
-
-
-const light =
-new THREE.DirectionalLight(
-0xffffff,
-5
-);
-
-
-light.position.set(
-0,
-1000,
-0
-);
-
-
+const light = new THREE.DirectionalLight(0xffffff, 4);
+light.position.set(0,1000,0);
 scene.add(light);
-
-
-
-
-
-
-// ======================
-// BLOCK OHNE TEXTUR
-// ======================
-
-
-const SIZE=4;
-
-
-
-function block(
-x,
-y,
-z,
-color
-){
-
-
-const cube =
-new THREE.Mesh(
-
-new THREE.BoxGeometry(
-SIZE,
-SIZE,
-SIZE
-),
-
-
-new THREE.MeshStandardMaterial({
-
-color:color
-
-})
-
-
-);
-
-
-
-cube.position.set(
-x,
-y,
-z
-);
-
-
-return cube;
-
-
-}
-
-
-
-
-
-
-
-
-// ======================
-// ARENA BODEN
-// ======================
-
-
-for(
-let x=-200;
-x<=200;
-x+=SIZE
-){
-
-
-for(
-let z=-200;
-z<=200;
-z+=SIZE
-){
-
-
-scene.add(
-
-block(
-x,
--300,
-z,
-0x555555
-)
-
-);
-
-
-}
-
-}
-
-
-
-
-
-
-
-// ======================
-// ARENA WÄNDE
-// KEINE DECKE
-// ======================
-
-
-for(
-let y=-300;
-y<=100;
-y+=SIZE
-){
-
-
-
-for(
-let x=-200;
-x<=200;
-x+=SIZE
-){
-
-
-
-scene.add(
-
-block(
-x,
-y,
--200,
-0x333333
-)
-
-);
-
-
-
-scene.add(
-
-block(
-x,
-y,
-200,
-0x333333
-)
-
-);
-
-
-
-}
-
-
-
-
-
-for(
-let z=-200;
-z<=200;
-z+=SIZE
-){
-
-
-
-scene.add(
-
-block(
--200,
-y,
-z,
-0x333333
-)
-
-);
-
-
-
-scene.add(
-
-block(
-200,
-y,
-z,
-0x333333
-)
-
-);
-
-
-
-}
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// ======================
-// SPAWN GLAS
-// ======================
-
-
-
-const glass =
-new THREE.MeshStandardMaterial({
-
-color:0x00ffff,
-
-transparent:true,
-
-opacity:0.35
-
-});
-
-
-
-
-
-for(
-let x=-120;
-x<=120;
-x+=SIZE
-){
-
-
-for(
-let z=-120;
-z<=120;
-z+=SIZE
-){
-
-
-
-let p =
-new THREE.Mesh(
-
-new THREE.BoxGeometry(
-SIZE,
-1,
-SIZE
-),
-
-glass
-
-);
-
-
-
-p.position.set(
-x,
-450,
-z
-);
-
-
-
-scene.add(p);
-
-
-}
-
-
-}
-
-
-
-
-
-
 
 
 // ======================
 // PLAYER
 // ======================
 
-
-const player =
-new THREE.Object3D();
-
-
+const player = new THREE.Object3D();
 scene.add(player);
 
-
-player.position.set(
-0,
-455,
-0
-);
-
-
-
+player.position.set(0,455,0);
 player.add(camera);
-
-
-camera.position.y=2;
-
-
-
-
-
+camera.position.y = 2;
 
 
 // ======================
-// PHYSIK
+// PHYSICS (FPS FEEL)
 // ======================
 
+let velocity = new THREE.Vector3();   // X Z movement
+let velocityY = 0;                    // Y movement
 
-let velocityY=0;
+let acceleration = 0.25;
+let friction = 0.85;  // wichtig für "sliding feel"
+let gravity = 0.04;
 
-let gravity=0.04;
-
-let jumpPower=1;
-
-let grounded=false;
-
-
-
-
+let canJump = false;
 
 
 // ======================
 // HEALTH
 // ======================
 
-
-let health=100;
-
-
-const hp =
-document.getElementById(
-"healthBar"
-);
-
-
-
-
-
-function respawn(){
-
-player.position.set(
-0,
-455,
-0
-);
-
-velocityY=0;
-
-
-}
-
-
-
-
+let health = 100;
+const hp = document.getElementById("healthBar");
 
 function damage(v){
+health -= v;
+if(health < 0) health = 0;
+hp.style.width = health + "%";
 
-
-health-=v;
-
-
-hp.style.width =
-health+"%";
-
-
-
-if(health<=0){
-
-health=100;
-
-hp.style.width="100%";
-
+if(health <= 0){
+health = 100;
+hp.style.width = "100%";
 respawn();
+}
+}
 
+function respawn(){
+player.position.set(0,455,0);
+velocity.set(0,0,0);
+velocityY = 0;
 }
 
 
-}
-
-
-
-
-
-
-
 // ======================
-// MOUSE
+// MOUSE CONTROL
 // ======================
 
+let rx = 0;
+let ry = 0;
 
-let rx=0;
-
-let ry=0;
-
-
-
-document.body.onclick=()=>{
-
+document.body.onclick = () => {
 document.body.requestPointerLock();
-
 };
 
-
-
-
-
-document.onmousemove=e=>{
-
+document.onmousemove = (e) => {
 
 if(document.pointerLockElement){
 
+ry -= e.movementX * 0.002;
+rx -= e.movementY * 0.002;
 
-ry-=e.movementX*0.002;
+rx = Math.max(-1.5, Math.min(1.5, rx));
 
-
-rx-=e.movementY*0.002;
-
-
-
-rx=Math.max(
--1.5,
-Math.min(1.5,rx)
-);
-
-
-
-camera.rotation.x=rx;
-
-
-player.rotation.y=ry;
-
+camera.rotation.x = rx;
+player.rotation.y = ry;
 
 }
 
-
-
 };
 
 
-
-
-
-
-
-
-
 // ======================
-// KEYS
+// INPUT
 // ======================
 
+let keys = {};
 
-let keys={};
+document.onkeydown = (e) => {
 
+keys[e.key.toLowerCase()] = true;
 
-
-document.onkeydown=e=>{
-
-
-keys[e.key.toLowerCase()]=true;
-
-
-
-if(
-e.code==="Space" &&
-grounded
-){
-
-
-velocityY=jumpPower;
-
-
-grounded=false;
-
-
+if(e.code === "Space" && canJump){
+velocityY = 1.2;
+canJump = false;
 }
 
+};
 
+document.onkeyup = (e) => {
+keys[e.key.toLowerCase()] = false;
 };
 
 
-
-document.onkeyup=e=>{
-
-keys[e.key.toLowerCase()]=false;
-
-};
-
-
-
-
-
-
-
-
 // ======================
-// UPDATE
+// UPDATE LOOP
 // ======================
-
 
 function update(){
 
+// direction input
+let dir = new THREE.Vector3();
 
+if(keys.w) dir.z -= 1;
+if(keys.s) dir.z += 1;
+if(keys.a) dir.x -= 1;
+if(keys.d) dir.x += 1;
 
-let move =
-new THREE.Vector3();
+dir.normalize();
 
-
-
-if(keys.w)
-move.z-=1;
-
-
-if(keys.s)
-move.z+=1;
-
-
-if(keys.a)
-move.x-=1;
-
-
-if(keys.d)
-move.x+=1;
-
-
-
-
-move.normalize();
-
-
-
-move.applyAxisAngle(
-
+// rotate to player direction
+dir.applyAxisAngle(
 new THREE.Vector3(0,1,0),
-
 player.rotation.y
-
 );
 
 
+// acceleration (FEEL CONTROL)
+velocity.x += dir.x * acceleration;
+velocity.z += dir.z * acceleration;
 
 
-player.position.add(
-move
-);
+// friction (sliding feel)
+velocity.x *= friction;
+velocity.z *= friction;
 
 
-
-
+// apply movement
+player.position.x += velocity.x;
+player.position.z += velocity.z;
 
 
 
 // gravity
+velocityY -= gravity;
+player.position.y += velocityY;
 
 
-velocityY-=gravity;
-
-
-player.position.y+=velocityY;
-
-
-
-
-
-
-
-// spawn halten
-
-
+// ground check (spawn only for now)
 if(
-
-player.position.y<=455 &&
-
-player.position.y>440 &&
-
-Math.abs(player.position.x)<120 &&
-
-Math.abs(player.position.z)<120
-
+player.position.y <= 455 &&
+Math.abs(player.position.x) < 120 &&
+Math.abs(player.position.z) < 120
 ){
-
-
-player.position.y=455;
-
-
-velocityY=0;
-
-
-grounded=true;
-
-
+player.position.y = 455;
+velocityY = 0;
+canJump = true;
 }
 
 
-
-
-
-
-
-// arena boden
-
-
-if(
-
-player.position.y<=-296 &&
-
-Math.abs(player.position.x)<200 &&
-
-Math.abs(player.position.z)<200
-
-){
-
-
-player.position.y=-296;
-
-
-velocityY=0;
-
-
-grounded=true;
-
-
-}
-
-
-
-
-
-
-
-// rausgefallen
-
-
-if(player.position.y<-600){
-
-
-damage(25);
-
-
+// fall reset
+if(player.position.y < -600){
+damage(20);
 respawn();
-
-
 }
 
-
-
 }
-
-
-
-
-
-
 
 
 // ======================
 // LOOP
 // ======================
 
-
 function animate(){
-
-
-requestAnimationFrame(
-animate
-);
-
-
+requestAnimationFrame(animate);
 update();
-
-
-
-renderer.render(
-scene,
-camera
-);
-
-
-
+renderer.render(scene,camera);
 }
-
 
 animate();
 
 
-
 </script>
 
-
 </body>
-
 </html>
