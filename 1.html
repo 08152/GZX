@@ -21,27 +21,19 @@ body{
 
 height:100vh;
 overflow:hidden;
-
 background:black;
 
 }
 
 
-/* =====================
-   BACKGROUND
-===================== */
 
+/* BACKGROUND */
 
 .background{
 
 position:fixed;
 
-top:0;
-left:0;
-
-width:100%;
-height:100%;
-
+inset:0;
 
 background-image:url("./1.png");
 
@@ -51,13 +43,11 @@ background-position:center;
 
 background-repeat:no-repeat;
 
-
 z-index:0;
 
 }
 
 
-/* dunkler Effekt */
 
 .background::after{
 
@@ -73,10 +63,9 @@ background:rgba(0,0,0,0.25);
 
 
 
-/* =====================
-   START BUTTON
-===================== */
 
+
+/* START */
 
 .topbar{
 
@@ -86,11 +75,9 @@ top:20px;
 
 width:100%;
 
-
 display:flex;
 
 justify-content:center;
-
 
 z-index:5;
 
@@ -100,34 +87,23 @@ z-index:5;
 
 .start-btn{
 
-
 background:#ffd900;
-
 
 border:none;
 
-
 padding:15px 50px;
-
 
 font-size:24px;
 
-
 font-weight:bold;
-
 
 border-radius:15px;
 
-
 cursor:pointer;
 
-
-box-shadow:
-0 0 20px yellow;
-
+box-shadow:0 0 20px yellow;
 
 transition:0.3s;
-
 
 }
 
@@ -135,38 +111,31 @@ transition:0.3s;
 
 .start-btn:hover{
 
-
 transform:scale(1.1);
-
 
 }
 
 
 
-/* =====================
-   HAMBURGER
-===================== */
 
+
+
+
+/* HAMBURGER */
 
 .hamburger{
 
-
 position:absolute;
-
 
 top:25px;
 
 right:25px;
 
-
 width:45px;
-
 
 cursor:pointer;
 
-
 z-index:10;
-
 
 }
 
@@ -174,60 +143,45 @@ z-index:10;
 
 .hamburger div{
 
-
 height:5px;
-
 
 background:white;
 
-
 margin:7px 0;
 
-
 border-radius:5px;
-
 
 }
 
 
 
-/* =====================
-   MENU
-===================== */
 
+
+
+
+/* MENU */
 
 .menu{
 
-
 position:absolute;
-
 
 top:0;
 
-
 right:-280px;
-
 
 width:280px;
 
-
 height:100%;
-
 
 background:rgba(0,0,0,0.85);
 
-
 backdrop-filter:blur(10px);
-
 
 transition:0.4s;
 
-
 z-index:9;
 
-
 padding-top:90px;
-
 
 }
 
@@ -235,77 +189,112 @@ padding-top:90px;
 
 .menu.open{
 
-
 right:0;
-
 
 }
 
-
-
-/* ICON */
 
 
 .menu img{
 
-
 width:130px;
-
 
 display:block;
 
-
 margin:25px auto;
-
 
 cursor:pointer;
 
-
-transition:0.3s;
-
-
 }
 
 
 
-.menu img:hover{
 
 
-transform:scale(1.1);
-
-
-}
-
-
-
-/* =====================
-   STATUS
-===================== */
-
+/* STATUS */
 
 .status{
 
-
 position:absolute;
-
 
 bottom:20px;
 
-
 width:100%;
-
 
 text-align:center;
 
-
 color:white;
-
 
 font-size:20px;
 
-
 z-index:5;
 
+}
+
+
+
+
+
+
+
+/* ==================
+   LOADING SCREEN
+================== */
+
+
+.loading{
+
+display:none;
+
+position:fixed;
+
+inset:0;
+
+background:#000;
+
+z-index:20;
+
+justify-content:center;
+
+align-items:center;
+
+flex-direction:column;
+
+color:white;
+
+font-size:25px;
+
+}
+
+
+
+.loader{
+
+width:70px;
+
+height:70px;
+
+border:8px solid #333;
+
+border-top:8px solid yellow;
+
+border-radius:50%;
+
+animation:rotate 1s linear infinite;
+
+margin-bottom:20px;
+
+}
+
+
+
+@keyframes rotate{
+
+100%{
+
+transform:rotate(360deg);
+
+}
 
 }
 
@@ -317,51 +306,43 @@ z-index:5;
 </head>
 
 
-
 <body>
 
 
 
-<!-- Hintergrund -->
 
 <div class="background"></div>
 
 
 
-<!-- Start -->
+
 
 <div class="topbar">
 
-
-<button class="start-btn">
+<button class="start-btn" onclick="startGame()">
 
 START
 
 </button>
 
-
 </div>
 
 
 
-<!-- Menü Button -->
 
 
 <div class="hamburger" onclick="toggleMenu()">
 
-
 <div></div>
 
 <div></div>
 
 <div></div>
-
 
 </div>
 
 
 
-<!-- Seiten Menü -->
 
 
 <div class="menu" id="menu">
@@ -381,13 +362,29 @@ onerror="this.style.display='none'"
 
 
 
-<!-- Server Status -->
 
 
 <div class="status" id="status">
 
-
 🔌 Verbinde mit Server...
+
+</div>
+
+
+
+
+
+
+<!-- LOADING -->
+
+
+<div class="loading" id="loading">
+
+
+<div class="loader"></div>
+
+
+Lädt Battle X...
 
 
 </div>
@@ -395,20 +392,56 @@ onerror="this.style.display='none'"
 
 
 
+
+
+
+
 <script>
 
 
-// Menü öffnen/schließen
+
+// Menü
+
 
 function toggleMenu(){
-
 
 document
 .getElementById("menu")
 .classList.toggle("open");
 
+}
+
+
+
+
+
+
+// START BUTTON
+
+
+function startGame(){
+
+
+document.getElementById("loading")
+.style.display="flex";
+
+
+
+setTimeout(()=>{
+
+
+window.location.href="game.html";
+
+
+},3000);
+
+
 
 }
+
+
+
+
 
 
 
@@ -427,10 +460,10 @@ new WebSocket(
 
 
 
-socket.onopen = function(){
+socket.onopen=function(){
 
 
-status.innerHTML =
+status.innerHTML=
 "✅ Online verbunden";
 
 
@@ -438,10 +471,10 @@ status.innerHTML =
 
 
 
-socket.onerror = function(){
+socket.onerror=function(){
 
 
-status.innerHTML =
+status.innerHTML=
 "❌ Server Fehler";
 
 
@@ -449,10 +482,10 @@ status.innerHTML =
 
 
 
-socket.onclose = function(){
+socket.onclose=function(){
 
 
-status.innerHTML =
+status.innerHTML=
 "⚠ Verbindung getrennt";
 
 
@@ -461,6 +494,7 @@ status.innerHTML =
 
 
 </script>
+
 
 
 
