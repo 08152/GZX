@@ -6,6 +6,7 @@
 
 <style>
 body { margin:0; overflow:hidden; background:black; }
+
 #overlay {
     position:absolute;
     width:100%; height:100%;
@@ -29,18 +30,19 @@ body { margin:0; overflow:hidden; background:black; }
 
 <script>
 let scene, camera, renderer, controls;
+let overlay = document.getElementById("overlay");
 
 let moveF=false, moveB=false, moveL=false, moveR=false;
 let velocity = new THREE.Vector3();
+let direction = new THREE.Vector3();
 let canJump = false;
 
-let players = 1; // 👉 TIMER STARTET BEI 1 PLAYER
+let players = 1;
 let eventStarted = false;
 let timer = 60;
 
 let doorLeft, doorRight;
 let npcs = [];
-
 let doorProgress = 0;
 
 init();
@@ -61,7 +63,8 @@ document.body.appendChild(renderer.domElement);
 controls = new THREE.PointerLockControls(camera, document.body);
 scene.add(controls.getObject());
 
-document.getElementById("overlay").onclick = () => controls.lock();
+overlay.onclick = () => controls.lock();
+
 controls.addEventListener("lock", ()=> overlay.style.display="none");
 controls.addEventListener("unlock", ()=> overlay.style.display="flex");
 
@@ -70,7 +73,6 @@ scene.add(new THREE.HemisphereLight(0xffffff,0x444444,0.7));
 
 const sun = new THREE.DirectionalLight(0xffffff,1);
 sun.position.set(10,20,10);
-sun.castShadow = true;
 scene.add(sun);
 
 /* ROOM */
@@ -100,17 +102,6 @@ doorRight.position.set(0.75,3,-24.5);
 scene.add(doorLeft);
 scene.add(doorRight);
 
-/* NPCS */
-function spawnNPC(){
-    const npc = new THREE.Mesh(
-        new THREE.BoxGeometry(1,1,1),
-        new THREE.MeshStandardMaterial({color:"yellow"})
-    );
-    npc.position.set(0,1,-8);
-    scene.add(npc);
-    npcs.push(npc);
-}
-
 /* SCREEN */
 const canvas = document.createElement("canvas");
 canvas.width=256; canvas.height=128;
@@ -131,23 +122,12 @@ setInterval(()=>{
     ctx.fillStyle="#00ff00";
     ctx.font="20px monospace";
     ctx.fillText("PLAYERS: "+players,10,40);
-    ctx.fillText("0$",10,80);
+    ctx.fillText("TIME: "+Math.floor(timer),10,80);
 
     tex.needsUpdate=true;
-},200);
+},100);
 
-/* SPEECH */
-function speak(text){
-    const msg = new SpeechSynthesisUtterance(text);
-    msg.lang="de-DE";
-    speechSynthesis.speak(msg);
-}
-
-/* HELPERS */
-function lerp(a,b,t){ return a+(b-a)*t; }
-function ease(t){ return t*t*(3-2*t); }
-
-/* CONTROLS */
+/* INPUT */
 document.addEventListener("keydown",(e)=>{
     if(e.code==="KeyW") moveF=true;
     if(e.code==="KeyS") moveB=true;
@@ -155,7 +135,7 @@ document.addEventListener("keydown",(e)=>{
     if(e.code==="KeyD") moveR=true;
 
     if(e.code==="Space" && canJump){
-        velocity.y = 0.16;
+        velocity.y = 0.18;
         canJump=false;
     }
 });
@@ -167,41 +147,72 @@ document.addEventListener("keyup",(e)=>{
     if(e.code==="KeyD") moveR=false;
 });
 
-/* RESIZE */
 window.addEventListener("resize",()=>{
 camera.aspect=innerWidth/innerHeight;
 camera.updateProjectionMatrix();
 renderer.setSize(innerWidth,innerHeight);
 });
 
-/* ---------------- LOOP ---------------- */
-function animate(){
-requestAnimationFrame(animate);
+/* NPC */
+function spawnNPC(){
+    const npc = new THREE.Mesh(
+        new THREE.BoxGeometry(1,1,1),
+        new THREE.MeshStandardMaterial({color:"yellow"})
+    );
+    npc.position.set(0,1,-8);
+    scene.add(npc);
+    npcs.push(npc);
+}
 
-if(controls.isLocked){
-
-/* TIMER START BEI 1 PLAYER */
+/* TIMER */
+function updateTimer(dt){
 if(players >= 1 && !eventStarted){
     eventStarted = true;
     timer = 60;
 }
 
-/* TIMER */
 if(eventStarted){
-    timer -= 0.016;
+    timer -= dt;
 
-    if(Math.floor(timer) === 50 && npcs.length === 0){
+    if(timer < 50 && npcs.length === 0){
         spawnNPC(); spawnNPC(); spawnNPC();
-        speak("Hallo Test!");
     }
 }
+}
 
-/* SMOOTH MOVEMENT */
-velocity.y -= 0.008;
+/* LOOP */
+let clock = new THREE.Clock();
 
-controls.moveRight((Number(moveR)-Number(moveL))*0.08);
-controls.moveForward((Number(moveF)-Number(moveB))*0.08);
+function animate(){
+requestAnimationFrame(animate);
 
+let dt = clock.getDelta();
+
+if(controls.isLocked){
+
+updateTimer(dt);
+
+/* MOVEMENT (FPS STYLE) */
+direction.z = Number(moveF) - Number(moveB);
+direction.x = Number(moveR) - Number(moveL);
+direction.normalize();
+
+/* acceleration */
+velocity.x += direction.x * 0.02;
+velocity.z += direction.z * 0.02;
+
+/* friction */
+velocity.x *= 0.85;
+velocity.z *= 0.85;
+
+/* gravity */
+velocity.y -= 0.01;
+
+/* apply movement */
+controls.moveRight(velocity.x);
+controls.moveForward(velocity.z);
+
+/* jump / ground */
 controls.getObject().position.y += velocity.y;
 
 if(controls.getObject().position.y < 1.7){
@@ -210,13 +221,13 @@ if(controls.getObject().position.y < 1.7){
     canJump = true;
 }
 
-/* CAMERA FEEL */
+/* cinematic bob */
 controls.getObject().position.y += Math.sin(Date.now()*0.003)*0.002;
 
-/* DOOR ANIMATION (FILM STYLE) */
-doorAnimation();
+/* DOOR */
+doorAnimation(dt);
 
-/* NPC BLEND MOVEMENT */
+/* NPC */
 npcLogic();
 
 }
@@ -224,31 +235,27 @@ npcLogic();
 renderer.render(scene,camera);
 }
 
-/* ---------------- CINEMATIC DOOR ---------------- */
-function doorAnimation(){
+/* DOOR CINEMATIC */
+function doorAnimation(dt){
 
-if(timer < 55){
-    doorProgress += 0.01;
-}
-
+if(timer < 55) doorProgress += dt * 0.5;
 doorProgress = Math.min(1, doorProgress);
-let e = ease(doorProgress);
 
-doorLeft.position.x = lerp(-0.75, -3.2, e);
-doorRight.position.x = lerp(0.75, 3.2, e);
+let e = doorProgress*doorProgress*(3-2*doorProgress);
+
+doorLeft.position.x = -0.75 + (-3.2 + 0.75)*e;
+doorRight.position.x = 0.75 + (3.2 - 0.75)*e;
 }
 
-/* ---------------- NPC BEHAVIOR ---------------- */
+/* NPC MOVE */
 function npcLogic(){
 npcs.forEach(n => {
-
 let target = 0;
 
-if(timer < 50 && timer > 45) target = -2;
-if(timer < 45 && timer > 40) target = -8;
+if(timer < 50) target = -2;
+if(timer < 45) target = -8;
 
-n.position.z = lerp(n.position.z, target, 0.05);
-
+n.position.z += (target - n.position.z) * 0.05;
 });
 }
 
