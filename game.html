@@ -1,272 +1,369 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-
 <meta charset="UTF-8">
-<title>Battle X FPS Feel</title>
+<title>Battle X FPS ULTIMATE</title>
 
 <style>
-
 body{
 margin:0;
 overflow:hidden;
 background:black;
+font-family:Arial;
 }
 
 canvas{display:block;}
 
-#info{
+#hud{
 position:absolute;
-top:20px;
-left:20px;
+top:10px;
+left:10px;
 color:white;
-font-family:Arial;
-z-index:5;
+z-index:10;
+font-size:14px;
 }
 
 #healthBox{
 position:absolute;
-right:30px;
-bottom:30px;
-width:300px;
-height:35px;
+right:20px;
+bottom:20px;
+width:250px;
+height:25px;
 background:#222;
-border:3px solid white;
-border-radius:10px;
-overflow:hidden;
+border:2px solid white;
 }
 
-#healthBar{
-height:100%;
+#health{
 width:100%;
-background:limegreen;
-transition:0.1s;
+height:100%;
+background:lime;
 }
 
+#ammo{
+position:absolute;
+right:20px;
+bottom:60px;
+color:white;
+font-size:18px;
+}
+
+#crosshair{
+position:absolute;
+left:50%;
+top:50%;
+width:10px;
+height:10px;
+transform:translate(-50%,-50%);
+border:2px solid white;
+border-radius:50%;
+}
 </style>
 
 </head>
 
 <body>
 
-<div id="info">
-WASD bewegen<br>
-SPACE springen<br>
-Klick = Maus lock
+<div id="hud">
+WASD bewegen | SHIFT sprint | SPACE springen | Klick = Lock + Schießen
 </div>
 
-<div id="healthBox">
-<div id="healthBar"></div>
-</div>
+<div id="crosshair"></div>
+
+<div id="ammo">Ammo: 30</div>
+
+<div id="healthBox"><div id="health"></div></div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 
 <script>
 
-
-// ======================
-// BASIC SETUP
-// ======================
-
+// =========================
+// SCENE
+// =========================
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x87ceeb);
 
-const camera = new THREE.PerspectiveCamera(
-75,
-innerWidth/innerHeight,
-0.1,
-100000
-);
+const camera = new THREE.PerspectiveCamera(75,innerWidth/innerHeight,0.1,10000);
 
 const renderer = new THREE.WebGLRenderer();
-renderer.setSize(innerWidth, innerHeight);
+renderer.setSize(innerWidth,innerHeight);
 document.body.appendChild(renderer.domElement);
 
-const light = new THREE.DirectionalLight(0xffffff, 4);
-light.position.set(0,1000,0);
+// LIGHT
+const light = new THREE.DirectionalLight(0xffffff,2);
+light.position.set(100,200,100);
 scene.add(light);
 
+// =========================
+// FLOOR
+// =========================
+const floorGeo = new THREE.BoxGeometry(1000,1,1000);
+const floorMat = new THREE.MeshStandardMaterial({color:0x444444});
+const floor = new THREE.Mesh(floorGeo,floorMat);
+floor.position.y = -1;
+scene.add(floor);
 
-// ======================
+// =========================
 // PLAYER
-// ======================
-
+// =========================
 const player = new THREE.Object3D();
 scene.add(player);
-
-player.position.set(0,455,0);
 player.add(camera);
 camera.position.y = 2;
 
+// spawn
+player.position.set(0,2,5);
 
-// ======================
-// PHYSICS (FPS FEEL)
-// ======================
+// =========================
+// MOVEMENT PHYSICS
+// =========================
+let velocity = new THREE.Vector3();
+let direction = new THREE.Vector3();
 
-let velocity = new THREE.Vector3();   // X Z movement
-let velocityY = 0;                    // Y movement
+let speed = 0.12;
+let sprintSpeed = 0.22;
+let friction = 0.85;
 
-let acceleration = 0.25;
-let friction = 0.85;  // wichtig für "sliding feel"
-let gravity = 0.04;
+let gravity = 0.03;
+let velocityY = 0;
 
 let canJump = false;
 
+// camera bob
+let bob = 0;
 
-// ======================
-// HEALTH
-// ======================
+// =========================
+// INPUT
+// =========================
+let keys = {};
 
+document.addEventListener("keydown",(e)=>{
+keys[e.key.toLowerCase()] = true;
+
+if(e.code === "Space" && canJump){
+velocityY = 0.8;
+canJump = false;
+}
+});
+
+document.addEventListener("keyup",(e)=>{
+keys[e.key.toLowerCase()] = false;
+});
+
+// mouse
+let rotX = 0;
+let rotY = 0;
+
+document.body.onclick = ()=>document.body.requestPointerLock();
+
+document.addEventListener("mousemove",(e)=>{
+if(document.pointerLockElement){
+rotY -= e.movementX * 0.002;
+rotX -= e.movementY * 0.002;
+rotX = Math.max(-1.4,Math.min(1.4,rotX));
+player.rotation.y = rotY;
+camera.rotation.x = rotX;
+}
+});
+
+// =========================
+// HEALTH / UI
+// =========================
 let health = 100;
-const hp = document.getElementById("healthBar");
+const healthBar = document.getElementById("health");
 
 function damage(v){
 health -= v;
 if(health < 0) health = 0;
-hp.style.width = health + "%";
-
-if(health <= 0){
-health = 100;
-hp.style.width = "100%";
-respawn();
-}
+healthBar.style.width = health + "%";
+if(health <= 0) respawn();
 }
 
 function respawn(){
-player.position.set(0,455,0);
-velocity.set(0,0,0);
-velocityY = 0;
+player.position.set(0,2,5);
+health = 100;
+healthBar.style.width = "100%";
 }
 
+// =========================
+// WEAPON
+// =========================
+let ammo = 30;
+let maxAmmo = 30;
+let reloadTime = false;
 
-// ======================
-// MOUSE CONTROL
-// ======================
+const ammoUI = document.getElementById("ammo");
 
-let rx = 0;
-let ry = 0;
+function shoot(){
+if(reloadTime) return;
+if(ammo <= 0) return;
 
-document.body.onclick = () => {
-document.body.requestPointerLock();
-};
+ammo--;
+ammoUI.innerText = "Ammo: " + ammo;
 
-document.onmousemove = (e) => {
-
-if(document.pointerLockElement){
-
-ry -= e.movementX * 0.002;
-rx -= e.movementY * 0.002;
-
-rx = Math.max(-1.5, Math.min(1.5, rx));
-
-camera.rotation.x = rx;
-player.rotation.y = ry;
-
+raycastShoot();
 }
 
-};
+document.addEventListener("mousedown",shoot);
 
-
-// ======================
-// INPUT
-// ======================
-
-let keys = {};
-
-document.onkeydown = (e) => {
-
-keys[e.key.toLowerCase()] = true;
-
-if(e.code === "Space" && canJump){
-velocityY = 1.2;
-canJump = false;
+function reload(){
+reloadTime = true;
+setTimeout(()=>{
+ammo = maxAmmo;
+ammoUI.innerText = "Ammo: " + ammo;
+reloadTime = false;
+},1200);
 }
 
-};
+document.addEventListener("keydown",(e)=>{
+if(e.key === "r") reload();
+});
 
-document.onkeyup = (e) => {
-keys[e.key.toLowerCase()] = false;
-};
+// =========================
+// ENEMIES
+// =========================
+let enemies = [];
 
+function spawnEnemy(x,z){
+const geo = new THREE.BoxGeometry(2,2,2);
+const mat = new THREE.MeshStandardMaterial({color:0xff0000});
+const mesh = new THREE.Mesh(geo,mat);
 
-// ======================
-// UPDATE LOOP
-// ======================
+mesh.position.set(x,1,z);
+scene.add(mesh);
 
-function update(){
+enemies.push({
+mesh:mesh,
+hp:3
+});
+}
 
-// direction input
+for(let i=0;i<10;i++){
+spawnEnemy((Math.random()-0.5)*50, (Math.random()-0.5)*50);
+}
+
+// =========================
+// SHOOTING (RAYCAST)
+// =========================
+const raycaster = new THREE.Raycaster();
+
+function raycastShoot(){
+
+raycaster.setFromCamera(new THREE.Vector2(0,0),camera);
+
+const hits = raycaster.intersectObjects(enemies.map(e=>e.mesh));
+
+if(hits.length > 0){
+const hit = hits[0].object;
+
+const enemy = enemies.find(e=>e.mesh === hit);
+
+if(enemy){
+enemy.hp--;
+
+enemy.mesh.material.color.set(0xffff00);
+
+setTimeout(()=>{
+enemy.mesh.material.color.set(0xff0000);
+},100);
+
+if(enemy.hp <= 0){
+scene.remove(enemy.mesh);
+enemies = enemies.filter(e=>e !== enemy);
+}
+}
+}
+}
+
+// =========================
+// UPDATE ENEMIES AI
+// =========================
+function updateEnemies(){
+for(let e of enemies){
 let dir = new THREE.Vector3();
-
-if(keys.w) dir.z -= 1;
-if(keys.s) dir.z += 1;
-if(keys.a) dir.x -= 1;
-if(keys.d) dir.x += 1;
-
+dir.subVectors(player.position,e.mesh.position);
+dir.y = 0;
 dir.normalize();
 
-// rotate to player direction
-dir.applyAxisAngle(
-new THREE.Vector3(0,1,0),
-player.rotation.y
-);
+e.mesh.position.addScaledVector(dir,0.02);
 
+// damage if close
+if(e.mesh.position.distanceTo(player.position) < 2){
+damage(1);
+}
+}
+}
 
-// acceleration (FEEL CONTROL)
-velocity.x += dir.x * acceleration;
-velocity.z += dir.z * acceleration;
+// =========================
+// MOVEMENT
+// =========================
+function updateMovement(){
 
+direction.set(0,0,0);
 
-// friction (sliding feel)
+if(keys.w) direction.z -= 1;
+if(keys.s) direction.z += 1;
+if(keys.a) direction.x -= 1;
+if(keys.d) direction.x += 1;
+
+direction.normalize();
+direction.applyAxisAngle(new THREE.Vector3(0,1,0),player.rotation.y);
+
+let currentSpeed = keys.shift ? sprintSpeed : speed;
+
+velocity.x += direction.x * currentSpeed;
+velocity.z += direction.z * currentSpeed;
+
 velocity.x *= friction;
 velocity.z *= friction;
 
-
-// apply movement
 player.position.x += velocity.x;
 player.position.z += velocity.z;
-
-
 
 // gravity
 velocityY -= gravity;
 player.position.y += velocityY;
 
-
-// ground check (spawn only for now)
-if(
-player.position.y <= 455 &&
-Math.abs(player.position.x) < 120 &&
-Math.abs(player.position.z) < 120
-){
-player.position.y = 455;
+// ground
+if(player.position.y <= 2){
+player.position.y = 2;
 velocityY = 0;
 canJump = true;
 }
-
-
-// fall reset
-if(player.position.y < -600){
-damage(20);
-respawn();
 }
 
+// =========================
+// CAMERA BOB
+// =========================
+function updateBob(){
+if(direction.length() > 0.1 && canJump){
+bob += 0.2;
+camera.position.y = 2 + Math.sin(bob) * 0.05;
+}else{
+camera.position.y = 2;
+}
 }
 
-
-// ======================
+// =========================
 // LOOP
-// ======================
-
+// =========================
 function animate(){
 requestAnimationFrame(animate);
-update();
+
+updateMovement();
+updateEnemies();
+updateBob();
+
 renderer.render(scene,camera);
 }
 
 animate();
 
+window.addEventListener("resize",()=>{
+camera.aspect = innerWidth/innerHeight;
+camera.updateProjectionMatrix();
+renderer.setSize(innerWidth,innerHeight);
+});
 
 </script>
 
