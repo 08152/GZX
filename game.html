@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+<title>Battle X Mega Arena</title>
+
+<style>
+
+body{
+margin:0;
+overflow:hidden;
+background:black;
+}
+
+canvas{
+display:block;
+}
+
+#info{
+position:absolute;
+top:20px;
+left:20px;
+color:white;
+font-family:Arial;
+font-size:22px;
+z-index:5;
+}
+
+</style>
+
+</head>
+
+<body>
+
+
+<div id="info">
+WASD = bewegen
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+
+
+<script>
+
+
+const scene = new THREE.Scene();
+
+scene.background =
+new THREE.Color(0x111111);
+
+
+
+const camera =
+new THREE.PerspectiveCamera(
+75,
+innerWidth/innerHeight,
+0.1,
+10000
+);
+
+
+
+camera.position.set(
+0,
+200,
+800
+);
+
+
+
+
+const renderer =
+new THREE.WebGLRenderer();
+
+
+renderer.setSize(
+innerWidth,
+innerHeight
+);
+
+
+document.body.appendChild(
+renderer.domElement
+);
+
+
+
+
+
+// Licht
+
+const light =
+new THREE.DirectionalLight(
+0xffffff,
+5
+);
+
+
+light.position.set(
+0,
+1000,
+500
+);
+
+
+scene.add(light);
+
+
+
+
+
+
+// =======================
+// TEXTUR
+// =======================
+
+
+const texture =
+new THREE.TextureLoader()
+.load("textur.png");
+
+
+
+texture.wrapS =
+THREE.RepeatWrapping;
+
+
+texture.wrapT =
+THREE.RepeatWrapping;
+
+
+texture.repeat.set(
+2,
+2
+);
+
+
+
+
+
+
+// =======================
+// BLOCK
+// =======================
+
+
+function block(x,y,z,size){
+
+
+const geo =
+new THREE.BoxGeometry(
+size,
+size,
+size
+);
+
+
+
+const mat =
+new THREE.MeshStandardMaterial({
+
+map:texture
+
+});
+
+
+
+const cube =
+new THREE.Mesh(
+geo,
+mat
+);
+
+
+
+cube.position.set(
+x,
+y,
+z
+);
+
+
+
+scene.add(cube);
+
+
+}
+
+
+
+
+
+
+// =======================
+// MEGA ARENA
+// =======================
+
+
+const arenaSize = 2000;
+
+const wallHeight = 500;
+
+const cubeSize = 50;
+
+
+
+// hintere Wand
+
+for(
+let x=-arenaSize/2;
+x<=arenaSize/2;
+x+=cubeSize
+){
+
+for(
+let y=0;
+y<=wallHeight;
+y+=cubeSize
+){
+
+
+block(
+x,
+y,
+-arenaSize/2,
+cubeSize
+);
+
+
+}
+
+}
+
+
+
+
+
+// linke Wand
+
+for(
+let z=-arenaSize/2;
+z<=arenaSize/2;
+z+=cubeSize
+){
+
+for(
+let y=0;
+y<=wallHeight;
+y+=cubeSize
+){
+
+
+block(
+-arenaSize/2,
+y,
+z,
+cubeSize
+);
+
+
+}
+
+}
+
+
+
+
+
+// rechte Wand
+
+for(
+let z=-arenaSize/2;
+z<=arenaSize/2;
+z+=cubeSize
+){
+
+for(
+let y=0;
+y<=wallHeight;
+y+=cubeSize
+){
+
+
+block(
+arenaSize/2,
+y,
+z,
+cubeSize
+);
+
+
+}
+
+}
+
+
+
+
+
+// Boden
+
+for(
+let x=-arenaSize/2;
+x<=arenaSize/2;
+x+=cubeSize
+){
+
+for(
+let z=-arenaSize/2;
+z<=arenaSize/2;
+z+=cubeSize
+){
+
+
+block(
+x,
+-50,
+z,
+cubeSize
+);
+
+
+}
+
+}
+
+
+
+
+
+
+// =======================
+// SPAWN
+// =======================
+
+
+for(
+let x=-300;
+x<=300;
+x+=cubeSize
+){
+
+for(
+let z=700;
+z<=900;
+z+=cubeSize
+){
+
+
+block(
+x,
+0,
+z,
+cubeSize
+);
+
+
+}
+
+}
+
+
+
+
+
+
+// =======================
+// SPIELER
+// =======================
+
+
+const player =
+new THREE.Mesh(
+
+new THREE.BoxGeometry(
+40,
+80,
+40
+),
+
+new THREE.MeshStandardMaterial({
+
+color:0x0099ff
+
+})
+
+);
+
+
+
+player.position.set(
+0,
+40,
+700
+);
+
+
+scene.add(player);
+
+
+
+
+
+
+// =======================
+// MOVEMENT
+// =======================
+
+
+let keys={};
+
+
+
+document.onkeydown=e=>{
+
+keys[e.key.toLowerCase()]=true;
+
+};
+
+
+
+document.onkeyup=e=>{
+
+keys[e.key.toLowerCase()]=false;
+
+};
+
+
+
+
+
+function move(){
+
+
+let speed=8;
+
+
+
+if(keys["w"])
+player.position.z-=speed;
+
+
+if(keys["s"])
+player.position.z+=speed;
+
+
+if(keys["a"])
+player.position.x-=speed;
+
+
+if(keys["d"])
+player.position.x+=speed;
+
+
+
+camera.position.x =
+player.position.x;
+
+
+camera.position.z =
+player.position.z+600;
+
+
+camera.position.y =
+player.position.y+300;
+
+
+
+camera.lookAt(
+player.position
+);
+
+
+}
+
+
+
+
+
+
+function animate(){
+
+requestAnimationFrame(
+animate
+);
+
+
+move();
+
+
+renderer.render(
+scene,
+camera
+);
+
+
+}
+
+
+animate();
+
+
+
+</script>
+
+
+</body>
+
+</html>
