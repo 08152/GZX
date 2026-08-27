@@ -1,217 +1,1352 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>FPS Room Event</title>
+<title>GHOST ISLAND - Chunk World</title>
 
 <style>
-
-body{
-margin:0;
-overflow:hidden;
-background:black;
+html,body{
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#79caff;
+    font-family:Arial,sans-serif;
 }
 
-canvas{display:block;}
+canvas{
+    display:block;
+}
 
 #hud{
-position:absolute;
-top:20px;
-left:20px;
-color:white;
-font-family:Arial;
-z-index:10;
+    position:absolute;
+    top:15px;
+    left:15px;
+    color:white;
+    z-index:20;
+    text-shadow:0 2px 5px #000;
+    pointer-events:none;
+    line-height:1.45;
 }
 
-#timer{
-position:absolute;
-top:20px;
-right:20px;
-color:#00ff00;
-font-family:monospace;
-font-size:20px;
-z-index:10;
-text-shadow:0 0 10px #00ff00;
+#hud b{
+    font-size:23px;
 }
 
-#dialog{
-position:absolute;
-bottom:30px;
-width:100%;
-text-align:center;
-color:yellow;
-font-size:28px;
-font-family:Arial;
-z-index:10;
-opacity:0;
-transition:0.5s;
+#crosshair{
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    color:white;
+    font-size:25px;
+    font-weight:bold;
+    text-shadow:0 0 5px #000;
+    z-index:20;
+    pointer-events:none;
+}
+
+
+/* =========================
+   MENÜ
+========================= */
+
+#menu{
+    position:absolute;
+    inset:0;
+    z-index:100;
+    background:rgba(0,0,0,.6);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+#menuBox{
+    width:380px;
+    max-width:85%;
+    padding:30px;
+    background:#20252a;
+    color:white;
+    border-radius:20px;
+    text-align:center;
+    box-shadow:0 15px 70px #000;
+}
+
+#menuBox h1{
+    font-size:40px;
+    margin:0;
+}
+
+#seed{
+    margin:18px 0;
+    background:#111;
+    border-radius:8px;
+    padding:10px;
+    font-family:monospace;
+}
+
+.menuButton{
+    width:100%;
+    padding:15px;
+    margin-top:10px;
+    border:0;
+    border-radius:10px;
+    font-size:18px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+#start{
+    background:#43d45b;
+}
+
+#newWorld{
+    background:#e2a52a;
+}
+
+
+/* =========================
+   MOBILE / CHROMEBOOK BUTTONS
+========================= */
+
+#controls{
+    position:absolute;
+    left:20px;
+    bottom:20px;
+    z-index:30;
+
+    display:grid;
+
+    grid-template-columns:
+        65px 65px 65px;
+
+    grid-template-rows:
+        65px 65px 65px;
+
+    gap:6px;
+
+    touch-action:none;
+}
+
+.move{
+    width:65px;
+    height:65px;
+
+    border-radius:14px;
+    border:2px solid rgba(255,255,255,.7);
+
+    background:rgba(0,0,0,.4);
+
+    color:white;
+    font-size:25px;
+    font-weight:bold;
+
+    user-select:none;
+    -webkit-user-select:none;
+
+    touch-action:none;
+}
+
+.move:active{
+    transform:scale(.92);
+    background:rgba(255,255,255,.3);
+}
+
+#up{
+    grid-column:2;
+    grid-row:1;
+}
+
+#left{
+    grid-column:1;
+    grid-row:2;
+}
+
+#down{
+    grid-column:2;
+    grid-row:2;
+}
+
+#right{
+    grid-column:3;
+    grid-row:2;
+}
+
+
+#jump{
+    position:absolute;
+
+    right:25px;
+    bottom:30px;
+
+    z-index:30;
+
+    width:95px;
+    height:95px;
+
+    border-radius:50%;
+
+    border:2px solid white;
+
+    background:rgba(0,0,0,.4);
+
+    color:white;
+
+    font-weight:bold;
+
+    touch-action:none;
+}
+
+#jump:active{
+    transform:scale(.92);
 }
 
 </style>
-
 </head>
 
 <body>
 
+
 <div id="hud">
-WASD bewegen<br>
-Klick = Maus
+
+<b>GHOST ISLAND</b><br>
+
+WASD / Buttons = Laufen<br>
+SPACE = Springen<br>
+Klick = Maus<br>
+
+Chunk:
+<span id="chunk">0 / 0</span><br>
+
+Position:
+<span id="position">0 / 0</span>
+
 </div>
 
-<div id="timer">WAITING PLAYERS...</div>
 
-<div id="dialog"></div>
+<div id="crosshair">+</div>
+
+
+<!-- =========================
+     MOVEMENT
+========================= -->
+
+<div id="controls">
+
+<button class="move" id="up">▲</button>
+
+<button class="move" id="left">◀</button>
+
+<button class="move" id="down">▼</button>
+
+<button class="move" id="right">▶</button>
+
+</div>
+
+
+<button id="jump">
+SPRINGEN
+</button>
+
+
+<!-- =========================
+     MENU
+========================= -->
+
+<div id="menu">
+
+<div id="menuBox">
+
+<h1>GHOST ISLAND</h1>
+
+<p>
+Riesige gestreamte 3D-Welt
+</p>
+
+<p>
+Nur die benötigten Bereiche werden geladen.
+</p>
+
+<div id="seed">
+Seed...
+</div>
+
+<button
+class="menuButton"
+id="start">
+
+SPIEL STARTEN
+
+</button>
+
+<button
+class="menuButton"
+id="newWorld">
+
+NEUE WELT
+
+</button>
+
+</div>
+
+</div>
+
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 
 <script>
 
-// ======================
+
+// ======================================================
+// WELT-SEED
+// ======================================================
+
+let savedSeed =
+localStorage.getItem(
+"GHOST_CHUNK_SEED"
+);
+
+
+if(!savedSeed){
+
+savedSeed =
+Math.floor(
+Math.random()*2147483647
+);
+
+localStorage.setItem(
+"GHOST_CHUNK_SEED",
+savedSeed
+);
+
+}
+
+
+const WORLD_SEED =
+Number(savedSeed);
+
+
+document.getElementById(
+"seed"
+).innerText =
+"SEED: "+WORLD_SEED;
+
+
+// ======================================================
+// HASH RANDOM
+// ======================================================
+
+function hash(x,z){
+
+let n =
+x*374761393+
+z*668265263+
+WORLD_SEED*1442695041;
+
+n =
+(n^(n>>13))*
+1274126177;
+
+n =
+n^(n>>16);
+
+return (
+(n>>>0)/
+4294967295
+);
+
+}
+
+
+// ======================================================
 // SCENE
-// ======================
+// ======================================================
 
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x222222);
+const scene =
+new THREE.Scene();
 
 
+scene.background =
+new THREE.Color(
+0x79caff
+);
+
+
+scene.fog =
+new THREE.Fog(
+0x79caff,
+500,
+2200
+);
+
+
+// ======================================================
 // CAMERA
-const camera = new THREE.PerspectiveCamera(
-75,innerWidth/innerHeight,0.1,3000
+// ======================================================
+
+const camera =
+new THREE.PerspectiveCamera(
+
+75,
+
+innerWidth/
+innerHeight,
+
+0.1,
+
+5000
+
 );
 
 
+// ======================================================
 // RENDERER
-const renderer = new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(innerWidth,innerHeight);
-renderer.shadowMap.enabled = true;
-document.body.appendChild(renderer.domElement);
+// ======================================================
+
+const renderer =
+new THREE.WebGLRenderer({
+
+antialias:true
+
+});
 
 
-
-// ======================
-// LIGHT (HELLER GEMACHT)
-// ======================
-
-// Ambient viel stärker
-scene.add(new THREE.AmbientLight(0xffffff,0.9));
-
-// Hauptlicht
-const mainLight = new THREE.DirectionalLight(0xffffff,1.5);
-mainLight.position.set(50,100,50);
-scene.add(mainLight);
+renderer.setSize(
+innerWidth,
+innerHeight
+);
 
 
-// Zusatzlicht für Helligkeit
-const fillLight = new THREE.PointLight(0xffffff,1);
-fillLight.position.set(0,20,0);
-scene.add(fillLight);
+renderer.setPixelRatio(
+Math.min(
+devicePixelRatio,
+1.5
+)
+);
 
 
+renderer.shadowMap.enabled=true;
 
-// ======================
-// ROOM (RIESIG)
-// ======================
 
-const roomSize = 200;
+document.body.appendChild(
+renderer.domElement
+);
 
-const room = new THREE.Mesh(
-new THREE.BoxGeometry(roomSize,roomSize,roomSize),
+
+// ======================================================
+// LIGHT
+// ======================================================
+
+scene.add(
+
+new THREE.AmbientLight(
+0xffffff,
+1
+)
+
+);
+
+
+const sun =
+new THREE.DirectionalLight(
+0xffffff,
+1.6
+);
+
+
+sun.position.set(
+500,
+900,
+400
+);
+
+
+sun.castShadow=true;
+
+
+scene.add(sun);
+
+
+// ======================================================
+// CHUNK SYSTEM
+// ======================================================
+
+const CHUNK_SIZE =
+300;
+
+
+// Nur 2 Ringe laden
+const RENDER_DISTANCE =
+2;
+
+
+// aktive Chunks
+const chunks =
+new Map();
+
+
+function chunkKey(cx,cz){
+
+return cx+","+cz;
+
+}
+
+
+// ======================================================
+// TERRAIN
+// ======================================================
+
+function getHeight(x,z){
+
+let h=0;
+
+
+h +=
+Math.sin(
+x*.002
+)*
+Math.cos(
+z*.002
+)*
+65;
+
+
+h +=
+Math.sin(
+x*.006+
+z*.004
+)*
+20;
+
+
+h +=
+Math.cos(
+x*.011-
+z*.009
+)*
+8;
+
+
+// große Landschaft
+h +=
+Math.sin(
+x*.00065
+)*
+Math.cos(
+z*.0008
+)*
+100;
+
+
+return h+15;
+
+}
+
+
+// ======================================================
+// CHUNK ERSTELLEN
+// ======================================================
+
+function createChunk(cx,cz){
+
+const key =
+chunkKey(cx,cz);
+
+
+if(chunks.has(key))
+return;
+
+
+const group =
+new THREE.Group();
+
+
+group.userData.cx=cx;
+group.userData.cz=cz;
+
+
+// ------------------------------------------------------
+// TERRAIN
+// ------------------------------------------------------
+
+const geo =
+new THREE.PlaneGeometry(
+
+CHUNK_SIZE,
+CHUNK_SIZE,
+
+16,
+16
+
+);
+
+
+geo.rotateX(
+-Math.PI/2
+);
+
+
+const pos =
+geo.attributes.position;
+
+
+for(
+let i=0;
+i<pos.count;
+i++
+){
+
+const localX =
+pos.getX(i);
+
+const localZ =
+pos.getZ(i);
+
+
+const worldX =
+cx*CHUNK_SIZE+
+localX+
+CHUNK_SIZE/2;
+
+
+const worldZ =
+cz*CHUNK_SIZE+
+localZ+
+CHUNK_SIZE/2;
+
+
+pos.setY(
+i,
+getHeight(
+worldX,
+worldZ
+)
+);
+
+}
+
+
+geo.computeVertexNormals();
+
+
+const ground =
+new THREE.Mesh(
+
+geo,
+
 new THREE.MeshStandardMaterial({
-color:0x333333,
-side:THREE.BackSide
+
+color:0x4d9b45,
+
+roughness:1
+
 })
-);
 
-scene.add(room);
-
-
-
-// ======================
-// DOOR (JETZT UNTEN)
-// ======================
-
-const doorMat = new THREE.MeshStandardMaterial({color:0x444444});
-
-const doorLeft = new THREE.Mesh(
-new THREE.BoxGeometry(10,20,2),
-doorMat
-);
-
-const doorRight = new THREE.Mesh(
-new THREE.BoxGeometry(10,20,2),
-doorMat
 );
 
 
-// 🔥 unten im Raum (statt hinten oben)
-doorLeft.position.set(-5,-90,-98);
-doorRight.position.set(5,-90,-98);
-
-scene.add(doorLeft);
-scene.add(doorRight);
+ground.receiveShadow=true;
 
 
+group.add(ground);
 
-// ======================
+
+// ------------------------------------------------------
+// BÄUME
+// ------------------------------------------------------
+
+const treeCount =
+6+
+Math.floor(
+hash(cx,cz)*9
+);
+
+
+for(
+let i=0;
+i<treeCount;
+i++
+){
+
+const r1 =
+hash(
+cx*100+i,
+cz*100+i
+);
+
+
+const r2 =
+hash(
+cx*200+i,
+cz*200+i
+);
+
+
+const x =
+cx*CHUNK_SIZE+
+r1*CHUNK_SIZE;
+
+
+const z =
+cz*CHUNK_SIZE+
+r2*CHUNK_SIZE;
+
+
+createTree(
+group,
+x,
+z,
+cx,
+cz,
+i
+);
+
+}
+
+
+// ------------------------------------------------------
+// FELSEN
+// ------------------------------------------------------
+
+const rockCount =
+4+
+Math.floor(
+hash(
+cx+99,
+cz+33
+)*7
+);
+
+
+for(
+let i=0;
+i<rockCount;
+i++
+){
+
+const r1 =
+hash(
+cx*300+i,
+cz*300+i
+);
+
+
+const r2 =
+hash(
+cx*400+i,
+cz*400+i
+);
+
+
+const x =
+cx*CHUNK_SIZE+
+r1*CHUNK_SIZE;
+
+
+const z =
+cz*CHUNK_SIZE+
+r2*CHUNK_SIZE;
+
+
+const y =
+getHeight(x,z);
+
+
+const size =
+3+
+hash(
+cx*500+i,
+cz*500+i
+)*12;
+
+
+const rock =
+new THREE.Mesh(
+
+new THREE.DodecahedronGeometry(
+size,
+0
+),
+
+new THREE.MeshStandardMaterial({
+
+color:0x777777,
+roughness:1
+
+})
+
+);
+
+
+rock.position.set(
+x,
+y+size*.5,
+z
+);
+
+
+rock.rotation.y =
+hash(
+cx*600+i,
+cz*600+i
+)*6;
+
+
+group.add(rock);
+
+}
+
+
+scene.add(group);
+
+chunks.set(key,group);
+
+}
+
+
+// ======================================================
+// TREE
+// ======================================================
+
+function createTree(
+group,
+x,
+z,
+cx,
+cz,
+index
+){
+
+const tree =
+new THREE.Group();
+
+
+const r =
+hash(
+cx*1000+
+index,
+cz*1000+
+index
+);
+
+
+// unterschiedliche Größe
+
+const height =
+28+
+r*28;
+
+
+const trunkRadius =
+1.5+
+r*1.5;
+
+
+// ------------------------------------------------------
+// STAMM
+// ------------------------------------------------------
+
+const trunk =
+new THREE.Mesh(
+
+new THREE.CylinderGeometry(
+
+trunkRadius*.7,
+trunkRadius,
+
+height,
+7
+
+),
+
+new THREE.MeshStandardMaterial({
+
+color:0x57361f,
+roughness:1
+
+})
+
+);
+
+
+trunk.position.y =
+height/2;
+
+
+tree.add(trunk);
+
+
+// ------------------------------------------------------
+// ÄSTE
+// ------------------------------------------------------
+
+const branches =
+4+
+Math.floor(r*5);
+
+
+for(
+let i=0;
+i<branches;
+i++
+){
+
+const angle =
+hash(
+cx*2000+
+index*20+i,
+cz*2000+
+index*20+i
+)*
+Math.PI*2;
+
+
+const branchY =
+height*.35+
+hash(
+cx*3000+i,
+cz*3000+i
+)*
+height*.45;
+
+
+const length =
+7+
+hash(
+cx*4000+i,
+cz*4000+i
+)*14;
+
+
+const branch =
+new THREE.Mesh(
+
+new THREE.CylinderGeometry(
+
+.35,
+.75,
+length,
+6
+
+),
+
+new THREE.MeshStandardMaterial({
+
+color:0x583720
+
+})
+
+);
+
+
+branch.position.set(
+
+Math.cos(angle)*
+length*.3,
+
+branchY,
+
+Math.sin(angle)*
+length*.3
+
+);
+
+
+branch.rotation.z =
+Math.PI/2-
+.35;
+
+
+branch.rotation.y =
+-angle;
+
+
+tree.add(branch);
+
+
+// ------------------------------------------------------
+// BLÄTTER
+// ------------------------------------------------------
+
+const leaves =
+new THREE.Mesh(
+
+new THREE.IcosahedronGeometry(
+4+
+hash(
+cx*5000+i,
+cz*5000+i
+)*4,
+1
+),
+
+new THREE.MeshStandardMaterial({
+
+color:0x23813a,
+roughness:1
+
+})
+
+);
+
+
+leaves.position.set(
+
+Math.cos(angle)*
+length*.65,
+
+branchY+
+4,
+
+Math.sin(angle)*
+length*.65
+
+);
+
+
+tree.add(leaves);
+
+}
+
+
+tree.position.set(
+x,
+getHeight(x,z),
+z
+);
+
+
+tree.rotation.y =
+r*Math.PI*2;
+
+
+tree.scale.setScalar(
+.8+r*.6
+);
+
+
+group.add(tree);
+
+}
+
+
+// ======================================================
+// CHUNK UPDATE
+// ======================================================
+
+let lastCX=null;
+let lastCZ=null;
+
+
+function updateChunks(){
+
+const cx =
+Math.floor(
+player.position.x/
+CHUNK_SIZE
+);
+
+
+const cz =
+Math.floor(
+player.position.z/
+CHUNK_SIZE
+);
+
+
+if(
+cx===lastCX &&
+cz===lastCZ
+)
+return;
+
+
+lastCX=cx;
+lastCZ=cz;
+
+
+// ------------------------------------------------------
+// BENÖTIGTE CHUNKS
+// ------------------------------------------------------
+
+const needed =
+new Set();
+
+
+for(
+let x=-RENDER_DISTANCE;
+x<=RENDER_DISTANCE;
+x++
+){
+
+for(
+let z=-RENDER_DISTANCE;
+z<=RENDER_DISTANCE;
+z++
+){
+
+const nx =
+cx+x;
+
+const nz =
+cz+z;
+
+
+needed.add(
+chunkKey(nx,nz)
+);
+
+
+createChunk(
+nx,nz
+);
+
+}
+
+}
+
+
+// ------------------------------------------------------
+// ENTFERNTE CHUNKS LÖSCHEN
+// ------------------------------------------------------
+
+for(
+const [key,group]
+of chunks
+){
+
+if(
+!needed.has(key)
+){
+
+scene.remove(group);
+
+chunks.delete(key);
+
+}
+
+}
+
+}
+
+
+// ======================================================
 // PLAYER
-// ======================
+// ======================================================
 
-const player = new THREE.Object3D();
+const player =
+new THREE.Object3D();
+
+
 scene.add(player);
 
-player.position.set(0,0,0);
 
-camera.position.y = 2;
+// Genau wie in deinem Code
+
+camera.position.y=2;
+
 player.add(camera);
 
 
+player.position.set(
+0,
+getHeight(0,0),
+0
+);
 
-// ======================
-// FPS PHYSICS
-// ======================
 
-let velocity = new THREE.Vector3();
-let gravity = 0.03;
-let canJump = false;
+// ======================================================
+// PHYSICS
+// ======================================================
 
-let keys = {};
+let velocity =
+new THREE.Vector3();
+
+
+let gravity=.03;
+
+let canJump=false;
+
+let keys={};
+
+
+// ======================================================
+// KEYBOARD
+// ======================================================
 
 document.onkeydown=(e)=>{
-keys[e.key.toLowerCase()]=true;
 
-if(e.code==="Space" && canJump){
-velocity.y = 0.9;
-canJump = false;
+keys[
+e.key.toLowerCase()
+]=true;
+
+
+if(
+e.code==="Space" &&
+canJump
+){
+
+velocity.y=.9;
+
+canJump=false;
+
 }
+
 };
+
 
 document.onkeyup=(e)=>{
-keys[e.key.toLowerCase()]=false;
+
+keys[
+e.key.toLowerCase()
+]=false;
+
 };
 
 
+// ======================================================
+// BUTTONS
+// ======================================================
 
-// ======================
-// MOUSE
-// ======================
+function setupButton(
+id,
+key
+){
 
-let rx=0, ry=0;
+const button =
+document.getElementById(id);
+
+
+function down(e){
+
+e.preventDefault();
+
+keys[key]=true;
+
+}
+
+
+function up(e){
+
+e.preventDefault();
+
+keys[key]=false;
+
+}
+
+
+button.addEventListener(
+"pointerdown",
+down
+);
+
+button.addEventListener(
+"pointerup",
+up
+);
+
+button.addEventListener(
+"pointercancel",
+up
+);
+
+button.addEventListener(
+"pointerleave",
+up
+);
+
+}
+
+
+setupButton(
+"up",
+"w"
+);
+
+setupButton(
+"down",
+"s"
+);
+
+setupButton(
+"left",
+"a"
+);
+
+setupButton(
+"right",
+"d"
+);
+
+
+document.getElementById(
+"jump"
+).addEventListener(
+"pointerdown",
+(e)=>{
+
+e.preventDefault();
+
+
+if(canJump){
+
+velocity.y=.9;
+
+canJump=false;
+
+}
+
+}
+);
+
+
+// ======================================================
+// MAUS
+// ======================================================
+
+let rx=0;
+
+let ry=0;
+
 
 document.body.onclick=()=>{
+
+if(
+!document.pointerLockElement
+){
+
 document.body.requestPointerLock();
+
+}
+
 };
+
 
 document.onmousemove=(e)=>{
 
-if(document.pointerLockElement){
+if(
+document.pointerLockElement
+){
 
-ry -= e.movementX*0.002;
-rx -= e.movementY*0.002;
+ry -=
+e.movementX*.002;
 
-rx=Math.max(-1.5,Math.min(1.5,rx));
+
+rx -=
+e.movementY*.002;
+
+
+rx=Math.max(
+-1.5,
+Math.min(
+1.5,
+rx
+)
+);
+
 
 camera.rotation.x=rx;
+
 player.rotation.y=ry;
 
 }
@@ -219,189 +1354,216 @@ player.rotation.y=ry;
 };
 
 
-
-// ======================
-// NPCs
-// ======================
-
-const npcMat = new THREE.MeshStandardMaterial({color:0xffff00});
-
-let npcs = [];
-
-function spawnNPC(x){
-const m = new THREE.Mesh(
-new THREE.BoxGeometry(2,2,2),
-npcMat
-);
-m.position.set(x,0,-60);
-scene.add(m);
-npcs.push(m);
-}
-
-spawnNPC(-3);
-spawnNPC(0);
-spawnNPC(3);
-
-
-
-// ======================
-// TIMER SYSTEM
-// ======================
-
-let timer = 60;
-const timerUI = document.getElementById("timer");
-const dialog = document.getElementById("dialog");
-
-function start(){
-
-let t = setInterval(()=>{
-
-timer--;
-timerUI.innerText = "START IN: " + timer;
-
-if(timer<=0){
-clearInterval(t);
-cutscene();
-}
-
-},1000);
-
-}
-
-
-
-// ======================
-// CUTSCENE
-// ======================
-
-function cutscene(){
-
-timerUI.innerText = "EVENT START";
-
-let step = 0;
-
-let move = setInterval(()=>{
-
-step++;
-
-// NPC laufen rein
-npcs.forEach(n=>{
-n.position.z += 0.5;
-});
-
-if(step > 60){
-clearInterval(move);
-say();
-}
-
-},30);
-
-}
-
-
-
-// ======================
-// DIALOG
-// ======================
-
-function say(){
-
-dialog.style.opacity=1;
-dialog.innerText="🔊 Hallo Test!";
-
-setTimeout(()=>{
-dialog.style.opacity=0;
-closeDoors();
-},2500);
-
-}
-
-
-
-// ======================
-// DOORS CLOSE (unten position fix)
-// ======================
-
-function closeDoors(){
-
-let step=0;
-
-let back = setInterval(()=>{
-
-step++;
-
-npcs.forEach(n=>{
-n.position.z -= 0.5;
-});
-
-// Türen zurück
-doorLeft.position.x -= 0.08;
-doorRight.position.x += 0.08;
-
-if(step>60){
-clearInterval(back);
-}
-
-},30);
-
-}
-
-
-
-// ======================
+// ======================================================
 // UPDATE
-// ======================
+// ======================================================
 
 function update(){
 
-let dir = new THREE.Vector3();
+let dir =
+new THREE.Vector3();
 
-if(keys.w) dir.z -= 1;
-if(keys.s) dir.z += 1;
-if(keys.a) dir.x -= 1;
-if(keys.d) dir.x += 1;
 
+if(keys.w)
+dir.z-=1;
+
+if(keys.s)
+dir.z+=1;
+
+if(keys.a)
+dir.x-=1;
+
+if(keys.d)
+dir.x+=1;
+
+
+if(dir.length()>0)
 dir.normalize();
 
-dir.applyAxisAngle(new THREE.Vector3(0,1,0),player.rotation.y);
 
-velocity.x += dir.x * 0.2;
-velocity.z += dir.z * 0.2;
+dir.applyAxisAngle(
 
-velocity.x *= 0.85;
-velocity.z *= 0.85;
+new THREE.Vector3(0,1,0),
 
-velocity.y -= gravity;
+player.rotation.y
 
-player.position.add(velocity);
+);
 
 
-// floor
-if(player.position.y < 0){
-player.position.y = 0;
-velocity.y = 0;
-canJump = true;
+const speed =
+keys.shift
+? .35
+: .20;
+
+
+velocity.x +=
+dir.x*speed;
+
+velocity.z +=
+dir.z*speed;
+
+
+velocity.x*=.84;
+velocity.z*=.84;
+
+
+velocity.y-=gravity;
+
+
+player.position.add(
+velocity
+);
+
+
+// Boden
+
+const ground =
+getHeight(
+player.position.x,
+player.position.z
+);
+
+
+if(
+player.position.y<
+ground
+){
+
+player.position.y=
+ground;
+
+velocity.y=0;
+
+canJump=true;
+
 }
 
+
+// Chunk-Streaming
+
+updateChunks();
+
+
+document.getElementById(
+"position"
+).innerText=
+
+Math.round(
+player.position.x
+)
++
+" / "+
+Math.round(
+player.position.z
+);
+
+
+document.getElementById(
+"chunk"
+).innerText=
+
+lastCX+
+" / "+
+lastCZ;
+
 }
 
 
+// ======================================================
+// START
+// ======================================================
 
-// ======================
+document.getElementById(
+"start"
+).onclick=()=>{
+
+document.getElementById(
+"menu"
+).style.display="none";
+
+
+document.body.requestPointerLock();
+
+};
+
+
+// ======================================================
+// NEUE WELT
+// ======================================================
+
+document.getElementById(
+"newWorld"
+).onclick=()=>{
+
+const newSeed =
+Math.floor(
+Math.random()*2147483647
+);
+
+
+localStorage.setItem(
+"GHOST_CHUNK_SEED",
+newSeed
+);
+
+
+location.reload();
+
+};
+
+
+// ======================================================
+// START CHUNKS
+// ======================================================
+
+updateChunks();
+
+
+// ======================================================
 // LOOP
-// ======================
+// ======================================================
 
 function animate(){
-requestAnimationFrame(animate);
+
+requestAnimationFrame(
+animate
+);
+
+
 update();
-renderer.render(scene,camera);
+
+
+renderer.render(
+scene,
+camera
+);
+
 }
+
 
 animate();
 
 
-// start event
-start();
+// ======================================================
+// RESIZE
+// ======================================================
+
+window.onresize=()=>{
+
+camera.aspect=
+innerWidth/
+innerHeight;
+
+
+camera.updateProjectionMatrix();
+
+
+renderer.setSize(
+innerWidth,
+innerHeight
+);
+
+};
 
 </script>
 
