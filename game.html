@@ -2,1568 +2,612 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>GHOST ISLAND - Chunk World</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LernStart – Nachhilfe</title>
 
 <style>
-html,body{
+*{
+    box-sizing:border-box;
     margin:0;
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    background:#79caff;
-    font-family:Arial,sans-serif;
+    padding:0;
 }
 
-canvas{
-    display:block;
+html{
+    scroll-behavior:smooth;
 }
 
-#hud{
-    position:absolute;
-    top:15px;
-    left:15px;
+body{
+    font-family:Arial,Helvetica,sans-serif;
+    background:linear-gradient(135deg,#fff8d9,#e8f5ff);
+    color:#172033;
+}
+
+header{
+    background:#172033;
     color:white;
-    z-index:20;
-    text-shadow:0 2px 5px #000;
-    pointer-events:none;
-    line-height:1.45;
-}
-
-#hud b{
-    font-size:23px;
-}
-
-#crosshair{
-    position:absolute;
-    left:50%;
-    top:50%;
-    transform:translate(-50%,-50%);
-    color:white;
-    font-size:25px;
-    font-weight:bold;
-    text-shadow:0 0 5px #000;
-    z-index:20;
-    pointer-events:none;
-}
-
-
-/* =========================
-   MENÜ
-========================= */
-
-#menu{
-    position:absolute;
-    inset:0;
-    z-index:100;
-    background:rgba(0,0,0,.6);
+    padding:20px 8%;
     display:flex;
+    justify-content:space-between;
     align-items:center;
-    justify-content:center;
+    position:sticky;
+    top:0;
+    z-index:100;
 }
 
-#menuBox{
-    width:380px;
-    max-width:85%;
-    padding:30px;
-    background:#20252a;
+.logo{
+    font-size:24px;
+    font-weight:800;
+}
+
+nav{
+    display:flex;
+    gap:10px;
+}
+
+nav a{
     color:white;
-    border-radius:20px;
-    text-align:center;
-    box-shadow:0 15px 70px #000;
-}
-
-#menuBox h1{
-    font-size:40px;
-    margin:0;
-}
-
-#seed{
-    margin:18px 0;
-    background:#111;
-    border-radius:8px;
-    padding:10px;
-    font-family:monospace;
-}
-
-.menuButton{
-    width:100%;
-    padding:15px;
-    margin-top:10px;
-    border:0;
+    text-decoration:none;
+    padding:11px 16px;
     border-radius:10px;
-    font-size:18px;
     font-weight:bold;
     cursor:pointer;
 }
 
-#start{
-    background:#43d45b;
+nav a:hover,
+nav a.active{
+    background:#ffd84d;
+    color:#172033;
 }
 
-#newWorld{
-    background:#e2a52a;
+.page{
+    display:none;
 }
 
+.page.active{
+    display:block;
+}
 
-/* =========================
-   MOBILE / CHROMEBOOK BUTTONS
-========================= */
+.hero{
+    min-height:520px;
+    padding:70px 8%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:50px;
+}
 
-#controls{
-    position:absolute;
-    left:20px;
-    bottom:20px;
-    z-index:30;
+.hero-text{
+    max-width:680px;
+}
 
+.badge{
+    display:inline-block;
+    background:#ffd84d;
+    padding:9px 16px;
+    border-radius:30px;
+    font-weight:bold;
+    margin-bottom:18px;
+}
+
+h1{
+    font-size:clamp(42px,7vw,72px);
+    line-height:1;
+}
+
+.hero p{
+    font-size:20px;
+    margin:25px 0;
+    line-height:1.5;
+}
+
+.button{
+    display:inline-block;
+    background:#172033;
+    color:white;
+    padding:15px 25px;
+    border-radius:12px;
+    text-decoration:none;
+    font-weight:bold;
+    border:0;
+    cursor:pointer;
+}
+
+.price-card{
+    background:white;
+    padding:35px;
+    border-radius:25px;
+    box-shadow:0 15px 40px #17203322;
+    min-width:290px;
+    text-align:center;
+}
+
+.price-card .emoji{
+    font-size:55px;
+}
+
+.price{
+    font-size:52px;
+    font-weight:900;
+    margin:10px 0;
+}
+
+section{
+    padding:70px 8%;
+}
+
+.title{
+    text-align:center;
+    font-size:38px;
+    margin-bottom:35px;
+}
+
+.features{
     display:grid;
-
-    grid-template-columns:
-        65px 65px 65px;
-
-    grid-template-rows:
-        65px 65px 65px;
-
-    gap:6px;
-
-    touch-action:none;
+    grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+    gap:22px;
+    max-width:1100px;
+    margin:auto;
 }
 
-.move{
-    width:65px;
-    height:65px;
+.feature{
+    background:white;
+    padding:28px;
+    border-radius:20px;
+    box-shadow:0 8px 25px #17203315;
+}
 
-    border-radius:14px;
-    border:2px solid rgba(255,255,255,.7);
+.feature span{
+    font-size:40px;
+}
 
-    background:rgba(0,0,0,.4);
+.feature h3{
+    margin:15px 0 8px;
+}
 
+.feature p{
+    line-height:1.5;
+    color:#536075;
+}
+
+.about{
+    max-width:900px;
+    margin:auto;
+    background:white;
+    padding:40px;
+    border-radius:25px;
+    box-shadow:0 10px 30px #17203315;
+    line-height:1.7;
+}
+
+.contact{
+    max-width:800px;
+    margin:40px auto;
+    background:#172033;
     color:white;
-    font-size:25px;
+    border-radius:30px;
+    padding:45px;
+    box-shadow:0 15px 40px #17203330;
+}
+
+.contact h2{
+    font-size:35px;
+    margin-bottom:10px;
+}
+
+.contact-intro{
+    margin-bottom:25px;
+    color:#cbd3df;
+}
+
+form{
+    display:grid;
+    gap:15px;
+}
+
+input,
+select,
+textarea{
+    width:100%;
+    padding:15px;
+    border:0;
+    border-radius:10px;
+    font-size:16px;
+    font-family:inherit;
+}
+
+textarea{
+    min-height:120px;
+    resize:vertical;
+}
+
+button{
+    border:0;
+    background:#ffd84d;
+    color:#172033;
+    padding:15px;
+    border-radius:10px;
+    font-size:17px;
     font-weight:bold;
-
-    user-select:none;
-    -webkit-user-select:none;
-
-    touch-action:none;
+    cursor:pointer;
 }
 
-.move:active{
-    transform:scale(.92);
-    background:rgba(255,255,255,.3);
-}
-
-#up{
-    grid-column:2;
-    grid-row:1;
-}
-
-#left{
-    grid-column:1;
-    grid-row:2;
-}
-
-#down{
-    grid-column:2;
-    grid-row:2;
-}
-
-#right{
-    grid-column:3;
-    grid-row:2;
-}
-
-
-#jump{
-    position:absolute;
-
-    right:25px;
-    bottom:30px;
-
-    z-index:30;
-
-    width:95px;
-    height:95px;
-
-    border-radius:50%;
-
-    border:2px solid white;
-
-    background:rgba(0,0,0,.4);
-
-    color:white;
-
+#status{
+    margin-top:20px;
+    text-align:center;
+    color:#ffd84d;
     font-weight:bold;
-
-    touch-action:none;
 }
 
-#jump:active{
-    transform:scale(.92);
+footer{
+    text-align:center;
+    padding:30px;
+    color:#687386;
 }
 
+@media(max-width:700px){
+
+    header{
+        flex-direction:column;
+        gap:15px;
+    }
+
+    nav{
+        flex-wrap:wrap;
+        justify-content:center;
+    }
+
+    .hero{
+        flex-direction:column;
+        text-align:center;
+        padding-top:50px;
+    }
+
+    .price-card{
+        width:100%;
+        max-width:350px;
+    }
+
+    .contact{
+        border-radius:20px;
+        padding:25px;
+    }
+}
 </style>
 </head>
 
 <body>
 
+<header>
 
-<div id="hud">
+    <div class="logo">📚 LernStart</div>
 
-<b>GHOST ISLAND</b><br>
+    <nav>
+        <a class="nav-link active" data-page="home">Startseite</a>
+        <a class="nav-link" data-page="angebot">Angebot</a>
+        <a class="nav-link" data-page="ueber">Über mich</a>
+        <a class="nav-link" data-page="termin">Termin anfragen</a>
+    </nav>
 
-WASD / Buttons = Laufen<br>
-SPACE = Springen<br>
-Klick = Maus<br>
-
-Chunk:
-<span id="chunk">0 / 0</span><br>
-
-Position:
-<span id="position">0 / 0</span>
-
-</div>
+</header>
 
 
-<div id="crosshair">+</div>
+<main>
 
+<!-- STARTSEITE -->
+<div id="home" class="page active">
 
-<!-- =========================
-     MOVEMENT
-========================= -->
+    <section class="hero">
 
-<div id="controls">
+        <div class="hero-text">
 
-<button class="move" id="up">▲</button>
+            <div class="badge">
+                Nachhilfe für die 1.–4. Klasse
+            </div>
 
-<button class="move" id="left">◀</button>
+            <h1>
+                Gemeinsam<br>
+                besser lernen.
+            </h1>
 
-<button class="move" id="down">▼</button>
+            <p>
+                Freundliche und verständliche Nachhilfe für
+                Grundschulkinder – mit Geduld, Spaß und ohne
+                unnötigen Druck.
+            </p>
 
-<button class="move" id="right">▶</button>
+            <button class="button" onclick="openPage('termin')">
+                Termin anfragen
+            </button>
 
-</div>
+        </div>
 
+        <div class="price-card">
 
-<button id="jump">
-SPRINGEN
-</button>
+            <div class="emoji">🎓</div>
 
+            <h2>Nachhilfe</h2>
 
-<!-- =========================
-     MENU
-========================= -->
+            <div class="price">20 €</div>
 
-<div id="menu">
+            <p>pro 90 Minuten</p>
 
-<div id="menuBox">
+        </div>
 
-<h1>GHOST ISLAND</h1>
-
-<p>
-Riesige gestreamte 3D-Welt
-</p>
-
-<p>
-Nur die benötigten Bereiche werden geladen.
-</p>
-
-<div id="seed">
-Seed...
-</div>
-
-<button
-class="menuButton"
-id="start">
-
-SPIEL STARTEN
-
-</button>
-
-<button
-class="menuButton"
-id="newWorld">
-
-NEUE WELT
-
-</button>
-
-</div>
+    </section>
 
 </div>
 
 
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<!-- ANGEBOT -->
+<div id="angebot" class="page">
+
+    <section>
+
+        <h2 class="title">
+            Mein Angebot
+        </h2>
+
+        <div class="features">
+
+            <div class="feature">
+                <span>➕</span>
+                <h3>Mathematik</h3>
+                <p>
+                    Rechnen, Aufgaben verstehen
+                    und gemeinsam üben.
+                </p>
+            </div>
+
+            <div class="feature">
+                <span>📖</span>
+                <h3>Deutsch</h3>
+                <p>
+                    Lesen, Schreiben, Rechtschreibung
+                    und Grammatik.
+                </p>
+            </div>
+
+            <div class="feature">
+                <span>🌍</span>
+                <h3>Englisch</h3>
+                <p>
+                    Grundlagen, Vokabeln und
+                    einfache Übungen.
+                </p>
+            </div>
+
+            <div class="feature">
+                <span>🧠</span>
+                <h3>Lernhilfe</h3>
+                <p>
+                    Hausaufgaben verstehen und
+                    besser lernen.
+                </p>
+            </div>
+
+        </div>
+
+    </section>
+
+</div>
+
+
+<!-- ÜBER MICH -->
+<div id="ueber" class="page">
+
+    <section>
+
+        <h2 class="title">
+            Über mich
+        </h2>
+
+        <div class="about">
+
+            <h2 style="margin-bottom:15px;">
+                👋 Hallo!
+            </h2>
+
+            <p>
+                Ich bin Schüler der 7. Klasse und möchte
+                Kindern aus der 1.–4. Klasse beim Lernen helfen.
+            </p>
+
+            <br>
+
+            <p>
+                Mir ist wichtig, dass Kinder Fragen stellen
+                können und den Stoff wirklich verstehen.
+            </p>
+
+            <br>
+
+            <p>
+                Eine Nachhilfestunde dauert 90 Minuten
+                und kostet <strong>20 €</strong>.
+            </p>
+
+        </div>
+
+    </section>
+
+</div>
+
+
+<!-- TERMIN -->
+<div id="termin" class="page">
+
+    <section>
+
+        <div class="contact">
+
+            <h2>
+                📅 Termin anfragen
+            </h2>
+
+            <p class="contact-intro">
+                Fülle das Formular aus. Anschließend
+                wird dein E-Mail-Programm geöffnet.
+            </p>
+
+            <form onsubmit="sendRequest(event)">
+
+                <input
+                    id="name"
+                    type="text"
+                    placeholder="Name des Kindes"
+                    required
+                >
+
+                <select id="klasse" required>
+                    <option value="">
+                        Klasse auswählen
+                    </option>
+                    <option>1. Klasse</option>
+                    <option>2. Klasse</option>
+                    <option>3. Klasse</option>
+                    <option>4. Klasse</option>
+                </select>
+
+                <select id="fach" required>
+                    <option value="">
+                        Fach auswählen
+                    </option>
+                    <option>Mathematik</option>
+                    <option>Deutsch</option>
+                    <option>Englisch</option>
+                    <option>Hausaufgaben / Lernhilfe</option>
+                </select>
+
+                <input
+                    id="zeit"
+                    type="text"
+                    placeholder="Wunschzeit, z. B. Mittwoch 16:00 Uhr"
+                    required
+                >
+
+                <textarea
+                    id="nachricht"
+                    placeholder="Weitere Nachricht (optional)"
+                ></textarea>
+
+                <button type="submit">
+                    📧 Anfrage senden
+                </button>
+
+            </form>
+
+            <div id="status"></div>
+
+        </div>
+
+    </section>
+
+</div>
+
+</main>
+
+
+<footer>
+    © 2026 LernStart · Nachhilfe 1.–4. Klasse
+</footer>
+
 
 <script>
 
+const links = document.querySelectorAll(".nav-link");
+const pages = document.querySelectorAll(".page");
 
-// ======================================================
-// WELT-SEED
-// ======================================================
+function openPage(pageName){
 
-let savedSeed =
-localStorage.getItem(
-"GHOST_CHUNK_SEED"
-);
+    pages.forEach(page=>{
+        page.classList.remove("active");
+    });
 
+    links.forEach(link=>{
+        link.classList.remove("active");
+    });
 
-if(!savedSeed){
+    document.getElementById(pageName).classList.add("active");
 
-savedSeed =
-Math.floor(
-Math.random()*2147483647
-);
+    const activeLink =
+        document.querySelector(
+            `.nav-link[data-page="${pageName}"]`
+        );
 
-localStorage.setItem(
-"GHOST_CHUNK_SEED",
-savedSeed
-);
+    if(activeLink){
+        activeLink.classList.add("active");
+    }
 
+    window.scrollTo({
+        top:0,
+        behavior:"smooth"
+    });
 }
 
+links.forEach(link=>{
 
-const WORLD_SEED =
-Number(savedSeed);
+    link.addEventListener("click",()=>{
 
+        openPage(
+            link.dataset.page
+        );
 
-document.getElementById(
-"seed"
-).innerText =
-"SEED: "+WORLD_SEED;
-
-
-// ======================================================
-// HASH RANDOM
-// ======================================================
-
-function hash(x,z){
-
-let n =
-x*374761393+
-z*668265263+
-WORLD_SEED*1442695041;
-
-n =
-(n^(n>>13))*
-1274126177;
-
-n =
-n^(n>>16);
-
-return (
-(n>>>0)/
-4294967295
-);
-
-}
-
-
-// ======================================================
-// SCENE
-// ======================================================
-
-const scene =
-new THREE.Scene();
-
-
-scene.background =
-new THREE.Color(
-0x79caff
-);
-
-
-scene.fog =
-new THREE.Fog(
-0x79caff,
-500,
-2200
-);
-
-
-// ======================================================
-// CAMERA
-// ======================================================
-
-const camera =
-new THREE.PerspectiveCamera(
-
-75,
-
-innerWidth/
-innerHeight,
-
-0.1,
-
-5000
-
-);
-
-
-// ======================================================
-// RENDERER
-// ======================================================
-
-const renderer =
-new THREE.WebGLRenderer({
-
-antialias:true
+    });
 
 });
 
 
-renderer.setSize(
-innerWidth,
-innerHeight
-);
+function sendRequest(event){
+
+    event.preventDefault();
+
+    const name =
+        document.getElementById("name").value;
+
+    const klasse =
+        document.getElementById("klasse").value;
+
+    const fach =
+        document.getElementById("fach").value;
+
+    const zeit =
+        document.getElementById("zeit").value;
+
+    const nachricht =
+        document.getElementById("nachricht").value;
 
 
-renderer.setPixelRatio(
-Math.min(
-devicePixelRatio,
-1.5
-)
-);
+    const text =
+`Hallo!
+
+ich interessiere mich für die Nachhilfe.
+
+Name des Kindes: ${name}
+Klasse: ${klasse}
+Fach: ${fach}
+Wunschzeit: ${zeit}
+
+Nachricht:
+${nachricht || "Keine weitere Nachricht."}
+
+Preis:
+20 € für 90 Minuten
+`;
 
 
-renderer.shadowMap.enabled=true;
+    const mail =
+        "mailto:r.schmid.8321@gmail.com" +
+        "?subject=" +
+        encodeURIComponent("Nachhilfe-Anfrage") +
+        "&body=" +
+        encodeURIComponent(text);
 
 
-document.body.appendChild(
-renderer.domElement
-);
+    document.getElementById("status").textContent =
+        "E-Mail-Programm wird geöffnet …";
 
-
-// ======================================================
-// LIGHT
-// ======================================================
-
-scene.add(
-
-new THREE.AmbientLight(
-0xffffff,
-1
-)
-
-);
-
-
-const sun =
-new THREE.DirectionalLight(
-0xffffff,
-1.6
-);
-
-
-sun.position.set(
-500,
-900,
-400
-);
-
-
-sun.castShadow=true;
-
-
-scene.add(sun);
-
-
-// ======================================================
-// CHUNK SYSTEM
-// ======================================================
-
-const CHUNK_SIZE =
-300;
-
-
-// Nur 2 Ringe laden
-const RENDER_DISTANCE =
-2;
-
-
-// aktive Chunks
-const chunks =
-new Map();
-
-
-function chunkKey(cx,cz){
-
-return cx+","+cz;
-
+    window.location.href = mail;
 }
-
-
-// ======================================================
-// TERRAIN
-// ======================================================
-
-function getHeight(x,z){
-
-let h=0;
-
-
-h +=
-Math.sin(
-x*.002
-)*
-Math.cos(
-z*.002
-)*
-65;
-
-
-h +=
-Math.sin(
-x*.006+
-z*.004
-)*
-20;
-
-
-h +=
-Math.cos(
-x*.011-
-z*.009
-)*
-8;
-
-
-// große Landschaft
-h +=
-Math.sin(
-x*.00065
-)*
-Math.cos(
-z*.0008
-)*
-100;
-
-
-return h+15;
-
-}
-
-
-// ======================================================
-// CHUNK ERSTELLEN
-// ======================================================
-
-function createChunk(cx,cz){
-
-const key =
-chunkKey(cx,cz);
-
-
-if(chunks.has(key))
-return;
-
-
-const group =
-new THREE.Group();
-
-
-group.userData.cx=cx;
-group.userData.cz=cz;
-
-
-// ------------------------------------------------------
-// TERRAIN
-// ------------------------------------------------------
-
-const geo =
-new THREE.PlaneGeometry(
-
-CHUNK_SIZE,
-CHUNK_SIZE,
-
-16,
-16
-
-);
-
-
-geo.rotateX(
--Math.PI/2
-);
-
-
-const pos =
-geo.attributes.position;
-
-
-for(
-let i=0;
-i<pos.count;
-i++
-){
-
-const localX =
-pos.getX(i);
-
-const localZ =
-pos.getZ(i);
-
-
-const worldX =
-cx*CHUNK_SIZE+
-localX+
-CHUNK_SIZE/2;
-
-
-const worldZ =
-cz*CHUNK_SIZE+
-localZ+
-CHUNK_SIZE/2;
-
-
-pos.setY(
-i,
-getHeight(
-worldX,
-worldZ
-)
-);
-
-}
-
-
-geo.computeVertexNormals();
-
-
-const ground =
-new THREE.Mesh(
-
-geo,
-
-new THREE.MeshStandardMaterial({
-
-color:0x4d9b45,
-
-roughness:1
-
-})
-
-);
-
-
-ground.receiveShadow=true;
-
-
-group.add(ground);
-
-
-// ------------------------------------------------------
-// BÄUME
-// ------------------------------------------------------
-
-const treeCount =
-6+
-Math.floor(
-hash(cx,cz)*9
-);
-
-
-for(
-let i=0;
-i<treeCount;
-i++
-){
-
-const r1 =
-hash(
-cx*100+i,
-cz*100+i
-);
-
-
-const r2 =
-hash(
-cx*200+i,
-cz*200+i
-);
-
-
-const x =
-cx*CHUNK_SIZE+
-r1*CHUNK_SIZE;
-
-
-const z =
-cz*CHUNK_SIZE+
-r2*CHUNK_SIZE;
-
-
-createTree(
-group,
-x,
-z,
-cx,
-cz,
-i
-);
-
-}
-
-
-// ------------------------------------------------------
-// FELSEN
-// ------------------------------------------------------
-
-const rockCount =
-4+
-Math.floor(
-hash(
-cx+99,
-cz+33
-)*7
-);
-
-
-for(
-let i=0;
-i<rockCount;
-i++
-){
-
-const r1 =
-hash(
-cx*300+i,
-cz*300+i
-);
-
-
-const r2 =
-hash(
-cx*400+i,
-cz*400+i
-);
-
-
-const x =
-cx*CHUNK_SIZE+
-r1*CHUNK_SIZE;
-
-
-const z =
-cz*CHUNK_SIZE+
-r2*CHUNK_SIZE;
-
-
-const y =
-getHeight(x,z);
-
-
-const size =
-3+
-hash(
-cx*500+i,
-cz*500+i
-)*12;
-
-
-const rock =
-new THREE.Mesh(
-
-new THREE.DodecahedronGeometry(
-size,
-0
-),
-
-new THREE.MeshStandardMaterial({
-
-color:0x777777,
-roughness:1
-
-})
-
-);
-
-
-rock.position.set(
-x,
-y+size*.5,
-z
-);
-
-
-rock.rotation.y =
-hash(
-cx*600+i,
-cz*600+i
-)*6;
-
-
-group.add(rock);
-
-}
-
-
-scene.add(group);
-
-chunks.set(key,group);
-
-}
-
-
-// ======================================================
-// TREE
-// ======================================================
-
-function createTree(
-group,
-x,
-z,
-cx,
-cz,
-index
-){
-
-const tree =
-new THREE.Group();
-
-
-const r =
-hash(
-cx*1000+
-index,
-cz*1000+
-index
-);
-
-
-// unterschiedliche Größe
-
-const height =
-28+
-r*28;
-
-
-const trunkRadius =
-1.5+
-r*1.5;
-
-
-// ------------------------------------------------------
-// STAMM
-// ------------------------------------------------------
-
-const trunk =
-new THREE.Mesh(
-
-new THREE.CylinderGeometry(
-
-trunkRadius*.7,
-trunkRadius,
-
-height,
-7
-
-),
-
-new THREE.MeshStandardMaterial({
-
-color:0x57361f,
-roughness:1
-
-})
-
-);
-
-
-trunk.position.y =
-height/2;
-
-
-tree.add(trunk);
-
-
-// ------------------------------------------------------
-// ÄSTE
-// ------------------------------------------------------
-
-const branches =
-4+
-Math.floor(r*5);
-
-
-for(
-let i=0;
-i<branches;
-i++
-){
-
-const angle =
-hash(
-cx*2000+
-index*20+i,
-cz*2000+
-index*20+i
-)*
-Math.PI*2;
-
-
-const branchY =
-height*.35+
-hash(
-cx*3000+i,
-cz*3000+i
-)*
-height*.45;
-
-
-const length =
-7+
-hash(
-cx*4000+i,
-cz*4000+i
-)*14;
-
-
-const branch =
-new THREE.Mesh(
-
-new THREE.CylinderGeometry(
-
-.35,
-.75,
-length,
-6
-
-),
-
-new THREE.MeshStandardMaterial({
-
-color:0x583720
-
-})
-
-);
-
-
-branch.position.set(
-
-Math.cos(angle)*
-length*.3,
-
-branchY,
-
-Math.sin(angle)*
-length*.3
-
-);
-
-
-branch.rotation.z =
-Math.PI/2-
-.35;
-
-
-branch.rotation.y =
--angle;
-
-
-tree.add(branch);
-
-
-// ------------------------------------------------------
-// BLÄTTER
-// ------------------------------------------------------
-
-const leaves =
-new THREE.Mesh(
-
-new THREE.IcosahedronGeometry(
-4+
-hash(
-cx*5000+i,
-cz*5000+i
-)*4,
-1
-),
-
-new THREE.MeshStandardMaterial({
-
-color:0x23813a,
-roughness:1
-
-})
-
-);
-
-
-leaves.position.set(
-
-Math.cos(angle)*
-length*.65,
-
-branchY+
-4,
-
-Math.sin(angle)*
-length*.65
-
-);
-
-
-tree.add(leaves);
-
-}
-
-
-tree.position.set(
-x,
-getHeight(x,z),
-z
-);
-
-
-tree.rotation.y =
-r*Math.PI*2;
-
-
-tree.scale.setScalar(
-.8+r*.6
-);
-
-
-group.add(tree);
-
-}
-
-
-// ======================================================
-// CHUNK UPDATE
-// ======================================================
-
-let lastCX=null;
-let lastCZ=null;
-
-
-function updateChunks(){
-
-const cx =
-Math.floor(
-player.position.x/
-CHUNK_SIZE
-);
-
-
-const cz =
-Math.floor(
-player.position.z/
-CHUNK_SIZE
-);
-
-
-if(
-cx===lastCX &&
-cz===lastCZ
-)
-return;
-
-
-lastCX=cx;
-lastCZ=cz;
-
-
-// ------------------------------------------------------
-// BENÖTIGTE CHUNKS
-// ------------------------------------------------------
-
-const needed =
-new Set();
-
-
-for(
-let x=-RENDER_DISTANCE;
-x<=RENDER_DISTANCE;
-x++
-){
-
-for(
-let z=-RENDER_DISTANCE;
-z<=RENDER_DISTANCE;
-z++
-){
-
-const nx =
-cx+x;
-
-const nz =
-cz+z;
-
-
-needed.add(
-chunkKey(nx,nz)
-);
-
-
-createChunk(
-nx,nz
-);
-
-}
-
-}
-
-
-// ------------------------------------------------------
-// ENTFERNTE CHUNKS LÖSCHEN
-// ------------------------------------------------------
-
-for(
-const [key,group]
-of chunks
-){
-
-if(
-!needed.has(key)
-){
-
-scene.remove(group);
-
-chunks.delete(key);
-
-}
-
-}
-
-}
-
-
-// ======================================================
-// PLAYER
-// ======================================================
-
-const player =
-new THREE.Object3D();
-
-
-scene.add(player);
-
-
-// Genau wie in deinem Code
-
-camera.position.y=2;
-
-player.add(camera);
-
-
-player.position.set(
-0,
-getHeight(0,0),
-0
-);
-
-
-// ======================================================
-// PHYSICS
-// ======================================================
-
-let velocity =
-new THREE.Vector3();
-
-
-let gravity=.03;
-
-let canJump=false;
-
-let keys={};
-
-
-// ======================================================
-// KEYBOARD
-// ======================================================
-
-document.onkeydown=(e)=>{
-
-keys[
-e.key.toLowerCase()
-]=true;
-
-
-if(
-e.code==="Space" &&
-canJump
-){
-
-velocity.y=.9;
-
-canJump=false;
-
-}
-
-};
-
-
-document.onkeyup=(e)=>{
-
-keys[
-e.key.toLowerCase()
-]=false;
-
-};
-
-
-// ======================================================
-// BUTTONS
-// ======================================================
-
-function setupButton(
-id,
-key
-){
-
-const button =
-document.getElementById(id);
-
-
-function down(e){
-
-e.preventDefault();
-
-keys[key]=true;
-
-}
-
-
-function up(e){
-
-e.preventDefault();
-
-keys[key]=false;
-
-}
-
-
-button.addEventListener(
-"pointerdown",
-down
-);
-
-button.addEventListener(
-"pointerup",
-up
-);
-
-button.addEventListener(
-"pointercancel",
-up
-);
-
-button.addEventListener(
-"pointerleave",
-up
-);
-
-}
-
-
-setupButton(
-"up",
-"w"
-);
-
-setupButton(
-"down",
-"s"
-);
-
-setupButton(
-"left",
-"a"
-);
-
-setupButton(
-"right",
-"d"
-);
-
-
-document.getElementById(
-"jump"
-).addEventListener(
-"pointerdown",
-(e)=>{
-
-e.preventDefault();
-
-
-if(canJump){
-
-velocity.y=.9;
-
-canJump=false;
-
-}
-
-}
-);
-
-
-// ======================================================
-// MAUS
-// ======================================================
-
-let rx=0;
-
-let ry=0;
-
-
-document.body.onclick=()=>{
-
-if(
-!document.pointerLockElement
-){
-
-document.body.requestPointerLock();
-
-}
-
-};
-
-
-document.onmousemove=(e)=>{
-
-if(
-document.pointerLockElement
-){
-
-ry -=
-e.movementX*.002;
-
-
-rx -=
-e.movementY*.002;
-
-
-rx=Math.max(
--1.5,
-Math.min(
-1.5,
-rx
-)
-);
-
-
-camera.rotation.x=rx;
-
-player.rotation.y=ry;
-
-}
-
-};
-
-
-// ======================================================
-// UPDATE
-// ======================================================
-
-function update(){
-
-let dir =
-new THREE.Vector3();
-
-
-if(keys.w)
-dir.z-=1;
-
-if(keys.s)
-dir.z+=1;
-
-if(keys.a)
-dir.x-=1;
-
-if(keys.d)
-dir.x+=1;
-
-
-if(dir.length()>0)
-dir.normalize();
-
-
-dir.applyAxisAngle(
-
-new THREE.Vector3(0,1,0),
-
-player.rotation.y
-
-);
-
-
-const speed =
-keys.shift
-? .35
-: .20;
-
-
-velocity.x +=
-dir.x*speed;
-
-velocity.z +=
-dir.z*speed;
-
-
-velocity.x*=.84;
-velocity.z*=.84;
-
-
-velocity.y-=gravity;
-
-
-player.position.add(
-velocity
-);
-
-
-// Boden
-
-const ground =
-getHeight(
-player.position.x,
-player.position.z
-);
-
-
-if(
-player.position.y<
-ground
-){
-
-player.position.y=
-ground;
-
-velocity.y=0;
-
-canJump=true;
-
-}
-
-
-// Chunk-Streaming
-
-updateChunks();
-
-
-document.getElementById(
-"position"
-).innerText=
-
-Math.round(
-player.position.x
-)
-+
-" / "+
-Math.round(
-player.position.z
-);
-
-
-document.getElementById(
-"chunk"
-).innerText=
-
-lastCX+
-" / "+
-lastCZ;
-
-}
-
-
-// ======================================================
-// START
-// ======================================================
-
-document.getElementById(
-"start"
-).onclick=()=>{
-
-document.getElementById(
-"menu"
-).style.display="none";
-
-
-document.body.requestPointerLock();
-
-};
-
-
-// ======================================================
-// NEUE WELT
-// ======================================================
-
-document.getElementById(
-"newWorld"
-).onclick=()=>{
-
-const newSeed =
-Math.floor(
-Math.random()*2147483647
-);
-
-
-localStorage.setItem(
-"GHOST_CHUNK_SEED",
-newSeed
-);
-
-
-location.reload();
-
-};
-
-
-// ======================================================
-// START CHUNKS
-// ======================================================
-
-updateChunks();
-
-
-// ======================================================
-// LOOP
-// ======================================================
-
-function animate(){
-
-requestAnimationFrame(
-animate
-);
-
-
-update();
-
-
-renderer.render(
-scene,
-camera
-);
-
-}
-
-
-animate();
-
-
-// ======================================================
-// RESIZE
-// ======================================================
-
-window.onresize=()=>{
-
-camera.aspect=
-innerWidth/
-innerHeight;
-
-
-camera.updateProjectionMatrix();
-
-
-renderer.setSize(
-innerWidth,
-innerHeight
-);
-
-};
 
 </script>
 
